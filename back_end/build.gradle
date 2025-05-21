@@ -37,6 +37,57 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// --- CI/CD를 위한 추가 설정 (통합 배포 시) ---
+
+// 1. 프론트엔드 프로젝트 빌드 태스크 (Node.js/npm이 CI 환경에 설치되어 있다고 가정)
+//    프론트엔드 프로젝트가 백엔드 프로젝트의 상위 폴더에 있다고 가정 (../my-react-app)
+task buildFrontend(type: Exec) {
+	description = 'Builds the frontend application.'
+	group = 'build' // 빌드 그룹에 포함
+
+	// 프론트엔드 프로젝트 디렉토리 설정
+	workingDir '../front_end' // 실제 프론트엔드 프로젝트 경로로 수정
+
+	// OS에 따라 npm 명령어 실행 방법 지정
+	if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+		commandLine 'cmd', '/c', 'npm', 'run', 'build'
+	} else {
+		commandLine 'npm', 'run', 'build' // 또는 'yarn', 'build'
+	}
+
+	// 표준 출력과 에러 출력을 Gradle 콘솔에 표시
+	standardOutput = new ByteArrayOutputStream()
+	errorOutput = new ByteArrayOutputStream()
+	doLast {
+		println "Frontend build output:\n${standardOutput.toString().trim()}"
+		if (errorOutput.size() > 0) {
+			System.err.println "Frontend build errors:\n${errorOutput.toString().trim()}"
+		}
+	}
+}
+
+// 2. 빌드된 프론트엔드 파일을 Spring Boot의 static 폴더로 복사하는 태스크
+task copyFrontend(type: Copy) {
+	description = 'Copies the built frontend application to Spring Boot static resources.'
+	group = 'build'
+	dependsOn buildFrontend // buildFrontend 태스크가 먼저 실행되도록 설정
+
+	from '../my-react-app/dist' // 프론트엔드 빌드 결과물 경로
+	into 'src/main/resources/static' // Spring Boot static 리소스 폴더
+}
+
+// 3. Spring Boot 애플리케이션을 빌드(bootJar)하기 전에 프론트엔드 파일을 복사하도록 설정
+// processResources 태스크가 실행되기 전에 copyFrontend 태스크가 실행되도록 설정
+// 이렇게 하면 복사된 정적 파일들이 JAR에 포함됩니다.
+processResources.dependsOn copyFrontend
+
+// 또는 bootJar 태스크가 copyFrontend에 의존하도록 명시할 수도 있습니다.
+// tasks.named('bootJar') {
+//    dependsOn copyFrontend
+// }
+
+// --- CI/CD 설정 끝 ---
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
