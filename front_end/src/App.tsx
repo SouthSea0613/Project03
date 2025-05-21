@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import {type JSX, useEffect, useState} from "react";
 import axios, {type AxiosResponse } from "axios"; // AxiosResponse 타입을 임포트하여 응답 객체 전체를 타이핑할 수 있습니다.
 
