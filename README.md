@@ -1,2 +1,2 @@
 # Project03
-SpringBoot(Gradle) + Vite + React + TypeScript + PostgreSQL + JPA
+SpringBoot(Gradle) + React + TypeScript + PostgreSQL + JPA
