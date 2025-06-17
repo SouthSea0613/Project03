@@ -1,2 +1,5 @@
 # Project03
-Next.js + TailwindCSS + SpringBoot(Gradle) + JPA + PostgreSQL
+FrontEnd : Next.js + Tailwind CSS
+BackEnd : SpringBoot(Gradle)
+ORM : JPA
+DB : PostgreSQL
