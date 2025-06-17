@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Project03
+    username: Project03
+    password: 1234  # 위에서 설정한 비밀번호
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # 개발 초기에는 update 또는 create, 운영에서는 none 사용
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # SLF4J 로깅 레벨 설정
+logging:
+  level:
+    root: info
+    com.example.project03: debug # 프로젝트 패키지는 debug 레벨로 설정
+
+# Swagger (OpenAPI) 설정
+springdoc:
+  default-produces-media-type: application/json
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
