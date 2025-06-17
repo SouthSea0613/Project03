@@ -1,2 +1,2 @@
 # Project03
-SpringBoot(Gradle) + React + TypeScript + PostgreSQL + JPA
+Next.js + TailwindCSS + SpringBoot(Gradle) + JPA + PostgreSQL
