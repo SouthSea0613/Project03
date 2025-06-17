@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/project03
-    username: project03
+    url: jdbc:postgresql://localhost:5432/Project03
+    username: Project03
     password: 1234  # 위에서 설정한 비밀번호
     driver-class-name: org.postgresql.Driver
 
