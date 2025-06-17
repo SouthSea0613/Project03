@@ -9,6 +9,6 @@ import java.util.Map;
 public class TestController {
     @GetMapping("/api/hello")
     public Map<String, String> hello() {
-        return Map.of("message", "spring 백엔드에서 보낸 메시지입니다");
+        return Map.of("message", "Spring Boot에서 보낸 메시지입니다");
     }
 }
