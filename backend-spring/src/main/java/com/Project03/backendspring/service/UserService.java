@@ -5,6 +5,7 @@ import com.Project03.backendspring.Users.UserRepository;
 import com.Project03.backendspring.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -12,8 +13,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     public User signup(UserDto userDto) {
-        String encodedPassword = userDto.getPassword();
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
         userDto.setPassword(encodedPassword);
 
         User newUserEntity = User.builder()

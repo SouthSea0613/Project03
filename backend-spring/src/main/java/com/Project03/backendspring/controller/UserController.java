@@ -26,20 +26,27 @@ public class UserController {
 
     @PostMapping("/api/signup")
     @ResponseBody
-    public ResponseEntity<?> signup(@RequestBody UserDto userDto) {
+    public ResponseEntity<ApiResponseDto> signup(@RequestBody UserDto userDto) {
         log.info("회원가입 컨트롤러");
         if(userDto==null){
-            return ResponseEntity.badRequest().body("에러");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"에러");
+            return ResponseEntity.badRequest().body(apiResponseDto);
         }
         try{
+            log.info("회원가입 try");
             User userinfo = userService.signup(userDto);
             if(userinfo==null){
-                return ResponseEntity.ok("회원가입 실패");
+                log.info("회원가입 실패");
+                ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 실패");
+                return ResponseEntity.ok(apiResponseDto);
             }
-            return ResponseEntity.ok("회원가입 성공");
+            log.info("회원가입 성공");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 성공");
+            return ResponseEntity.ok(apiResponseDto);
         }catch (Exception e){
             System.err.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"서버 에러");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDto);
         }
     }
 
