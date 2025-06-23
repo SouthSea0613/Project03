@@ -9,7 +9,7 @@ export default function Home() {
 
     useEffect(() => {
         // Spring Boot API 호출
-        springFetcher('/api/hello')
+        springFetcher('/api/test')
             .then((data) => {
                 setSpringMessage(data.message);
             })
@@ -19,7 +19,7 @@ export default function Home() {
             });
 
         // FastAPI API 호출
-        fastApiFetcher('/api/hello')
+        fastApiFetcher('/api/test')
             .then((data) => {
                 setFastApiMessage(data.message);
             })
