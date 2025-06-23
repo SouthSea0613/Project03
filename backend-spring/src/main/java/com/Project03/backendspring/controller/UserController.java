@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -18,14 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-
-    @GetMapping("/signup")
-    public String signup() {
-        return "/signup";
-    }
-
     @PostMapping("/api/signup")
-    @ResponseBody
     public ResponseEntity<ApiResponseDto> signup(@RequestBody UserDto userDto) {
         log.info("회원가입 컨트롤러");
         if(userDto==null){
@@ -51,7 +43,6 @@ public class UserController {
     }
 
     @PostMapping("/api/checkUsername")
-    @ResponseBody
     public ResponseEntity<CheckUsernameResponseDto> checkusername(@RequestBody UserDto userDto) {
         if(userDto.getUsername() == null){
             CheckUsernameResponseDto responseDto = new CheckUsernameResponseDto();

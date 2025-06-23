@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    @Query("select count(*) >0 from User where username = '?1'")
+    @Query("select count(*) >0 from User where username = ?1")
     boolean checkusername(String username);
 
 }
