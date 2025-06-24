@@ -1,12 +1,11 @@
-package com.Project03.backendspring.service;
+package com.Project03.backendspring.Users;
 
-import com.Project03.backendspring.Users.User;
-import com.Project03.backendspring.Users.UserRepository;
-import com.Project03.backendspring.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,5 +32,19 @@ public class UserService {
     public boolean checkUsername(String username) {
         log.info("서비스");
         return !userRepository.checkusername(username);
+    }
+
+    public boolean login(String username, String password) {
+        Optional <User> userOptional  = userRepository.findByUsername(username);
+        log.info(password);
+        if(userOptional.isEmpty()){
+            return false;
+        }
+        if(!passwordEncoder.matches(password,userOptional.get().getPassword())){
+            log.info("비밀번호 불일치");
+            return false;
+        }
+        log.info("비밀번호 일치");
+        return true;
     }
 }

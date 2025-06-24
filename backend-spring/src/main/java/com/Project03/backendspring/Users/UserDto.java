@@ -1,4 +1,4 @@
-package com.Project03.backendspring.dto;
+package com.Project03.backendspring.Users;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

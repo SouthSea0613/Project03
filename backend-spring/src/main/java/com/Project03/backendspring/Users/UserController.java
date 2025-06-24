@@ -1,10 +1,7 @@
-package com.Project03.backendspring.controller;
+package com.Project03.backendspring.Users;
 
-import com.Project03.backendspring.Users.User;
-import com.Project03.backendspring.dto.UserDto;
 import com.Project03.backendspring.dto.response.ApiResponseDto;
 import com.Project03.backendspring.dto.response.CheckUsernameResponseDto;
-import com.Project03.backendspring.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -58,5 +55,25 @@ public class UserController {
             CheckUsernameResponseDto responseDto = new CheckUsernameResponseDto(false,"아이디 중복 확인 중 오류 발생");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
+    }
+
+    @PostMapping("/api/login")
+    public ResponseEntity<ApiResponseDto> login(@RequestBody UserDto userDto){
+        if(userDto.getUsername() == null | userDto.getPassword() == null){
+            return ResponseEntity.badRequest().body(new ApiResponseDto(false,"에러"));
+        }
+        log.info("로그인 컨트롤러");
+        try{
+            boolean isSuccess  = userService.login(userDto.getUsername(),userDto.getPassword());
+            if(isSuccess){
+                return ResponseEntity.ok(new ApiResponseDto(true,"로그인 성공"));
+            }
+            return ResponseEntity.ok(new ApiResponseDto(false,"로그인 실패"));
+
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDto(false,"서버 에러"));
+        }
+
     }
 }
