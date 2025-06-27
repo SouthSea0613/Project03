@@ -18,15 +18,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Slf4j(topic = "JWT 검증 및 인가")
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = jwtUtil.getJwtFromHeader(request);
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+        String token = jwtUtil.getJwtFromHeader(httpServletRequest);
 
         if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
             Claims info = jwtUtil.getUserInfoFromToken(token);
@@ -34,14 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 setAuthentication(info.getSubject());
             } catch (Exception e) {
                 log.error("인증 처리 중 오류 발생", e);
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         }
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
-    // 인증 처리
     public void setAuthentication(String username) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
