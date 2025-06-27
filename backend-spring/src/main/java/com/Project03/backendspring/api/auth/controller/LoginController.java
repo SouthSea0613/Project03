@@ -24,8 +24,8 @@ public class LoginController {
         }
         log.info("로그인 컨트롤러");
         try{
-            boolean isSuccess  = loginService.login(userDto.getUsername(),userDto.getPassword());
-            if(isSuccess){
+            String userToken  = loginService.login(userDto.getUsername(),userDto.getPassword());
+            if(userToken !=null){
                 return ResponseEntity.ok(new ApiResponseDto(true,"로그인 성공"));
             }
             return ResponseEntity.ok(new ApiResponseDto(false,"로그인 실패"));

@@ -3,6 +3,8 @@ package com.Project03.backendspring.api.auth.service;
 import com.Project03.backendspring.api.auth.repository.AuthRepository;
 import com.Project03.backendspring.config.PasswordEncoderConfig;
 import com.Project03.backendspring.entity.UserEntity;
+import com.Project03.backendspring.jwt.JwtUtil;
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,18 +17,19 @@ import java.util.Optional;
 public class LoginService {
     private final AuthRepository authRepository;
     private final PasswordEncoderConfig passwordEncoderConfig;
-
-    public boolean login(String username, String password) {
+    private final JwtUtil jwtUtil;
+    public String login(String username, String password) {
         Optional<UserEntity> userOptional  = authRepository.findByUsername(username);
         log.info(password);
         if(userOptional.isEmpty()){
-            return false;
+            return null;
         }
         if(!passwordEncoderConfig.passwordEncoder().matches(password,userOptional.get().getPassword())){
             log.info("비밀번호 불일치");
-            return false;
+            return null;
         }
         log.info("비밀번호 일치");
-        return true;
+        String token = jwtUtil.createToken(username, userOptional.get().getRole());
+        return token;
     }
 }
