@@ -41,12 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         }
-        else {
-            log.error("토큰이 유효하지 않음");
-            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpServletResponse.setContentType("application/json");
-            httpServletResponse.getWriter().write("{\"error\":\"Invalid Token\"}");
-        }
+
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
