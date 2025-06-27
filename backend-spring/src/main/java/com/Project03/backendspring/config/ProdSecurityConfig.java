@@ -38,8 +38,8 @@ public class ProdSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN") // 예: /api/admin 경로는 ADMIN 권한 필요
-                                .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // 예: /api/user 경로는 USER 또는 ADMIN 권한 필요
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
