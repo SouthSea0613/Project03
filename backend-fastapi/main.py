@@ -25,6 +25,6 @@ app.add_middleware(
 )
 
 # 테스트용 API 엔드포인트
-@app.get("/api/hello")
+@app.get("/api/test")
 def read_root():
     return {"message": "FastAPI에서 보낸 메시지입니다"}

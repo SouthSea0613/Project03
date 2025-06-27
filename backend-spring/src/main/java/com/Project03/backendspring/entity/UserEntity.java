@@ -1,27 +1,28 @@
-package com.Project03.backendspring.Users;
+package com.Project03.backendspring.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigInteger;
 
 @Getter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name =  "\"user\"")
+@Table(name =  "\"tb_user\"")
 @Builder
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long user_id;
+
     @Column(length = 50, nullable = false)
     private String username;
 
     @Column(length = 255, nullable = false)
     private String password;
+
     @Column(length = 100, nullable = false)
     private String email;
+
     @Column(length = 10, nullable = false)
     private String postcode;
 

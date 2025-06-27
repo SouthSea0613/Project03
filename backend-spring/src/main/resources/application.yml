@@ -1,4 +1,10 @@
 spring:
+  profiles:
+    active: dev
+
+  application:
+    name: backend-spring
+
   datasource:
     url: jdbc:postgresql://localhost:5432/Project03
     username: postgres
