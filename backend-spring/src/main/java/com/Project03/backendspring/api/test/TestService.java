@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("dev")
 public class TestService {
-    public String hello() {
-        return "Spring Boot.TestService에서 보낸 메시지입니다";
+    public String test() {
+        return "SpringBoot.TestService에서 보낸 메시지입니다";
     }
 }

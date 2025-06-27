@@ -15,7 +15,7 @@ public class TestController {
     private final TestService testService;
 
     @GetMapping("/api/test")
-    public ResponseEntity<Map<String, String>> hello() {
-        return ResponseEntity.ok(Map.of("message", "Spring Boot.TestController에서 보낸 메시지입니다. " + testService.hello()));
+    public ResponseEntity<Map<String, String>> test() {
+        return ResponseEntity.ok(Map.of("message", "SpringBoot.TestController에서 보낸 메시지입니다. " + testService.test()));
     }
 }

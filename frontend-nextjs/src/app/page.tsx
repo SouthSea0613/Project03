@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { springFetcher, fastApiFetcher } from '@/lib/api';
 
 export default function Home() {
-    const [springMessage, setSpringMessage] = useState('Spring Boot 메시지 로딩 중...');
+    const [springMessage, setSpringMessage] = useState('SpringBoot 메시지 로딩 중...');
     const [fastApiMessage, setFastApiMessage] = useState('FastAPI 메시지 로딩 중...');
 
     useEffect(() => {
@@ -14,8 +14,8 @@ export default function Home() {
                 setSpringMessage(data.message);
             })
             .catch((error) => {
-                console.error('Error fetching from Spring Boot:', error);
-                setSpringMessage('Spring Boot 데이터를 불러오는 데 실패했습니다.');
+                console.error('Error fetching from SpringBoot:', error);
+                setSpringMessage('SpringBoot 데이터를 불러오는 데 실패했습니다.');
             });
 
         // FastAPI API 호출
