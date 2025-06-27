@@ -32,11 +32,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims info = jwtUtil.getUserInfoFromToken(token);
             try {
                 setAuthentication(info.getSubject());
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 log.error("인증 처리 중 오류 발생", e);
                 httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpServletResponse.setContentType("application/json");
+                httpServletResponse.getWriter().write("{\"error\":\"Authentication failed\"}");
                 return;
             }
+        }
+        else {
+            log.error("토큰이 유효하지 않음");
+            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpServletResponse.setContentType("application/json");
+            httpServletResponse.getWriter().write("{\"error\":\"Invalid Token\"}");
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
