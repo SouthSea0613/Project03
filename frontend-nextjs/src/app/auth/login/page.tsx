@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
 
@@ -13,26 +15,31 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/auth/login`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                }
+            );
 
             if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(errorMessage || '로그인 실패');
+                throw new Error('로그인 요청에 실패했습니다.');
             }
 
-            const token = response.headers.get('Authorization');
+            const token = await response.text();
+
             if (token) {
-                localStorage.setItem('jwt', token);
-                router.push('/');
-            } else {
-                throw new Error('토큰을 받지 못했습니다.');
+                Cookies.set('jwt', token, { path: '/' });
+                alert("로그인 성공!");
+                router.push("/");
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : '로그인 중 오류가 발생했습니다.');
+            console.error("로그인 실패:", error);
+            alert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
         }
     };
 

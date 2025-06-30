@@ -31,7 +31,7 @@ export default function SignupPage() {
                 body: JSON.stringify(formData),
             });
             alert('회원가입 성공! 로그인 페이지로 이동합니다.');
-            router.push('/login');
+            router.push('/auth/login');
         } catch (err) {
             setError(err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.');
         }
