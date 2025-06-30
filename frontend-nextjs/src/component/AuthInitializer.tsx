@@ -14,15 +14,17 @@ export default function AuthInitializer() {
                 setIsLoading(false)
                 return;
             }
-            springFetcher('/api/verify',{
+            springFetcher('/api/user/me',{
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             }).then(res => {
                 console.log(res);
+                setUser(res.data)
                 setIsLoggedIn(true);
             }).catch(err => {
                 console.log(err);
+                setUser(null)
                 setIsLoggedIn(false);
             })
         }
