@@ -38,4 +38,19 @@ public class LoginController {
         }
 
     }
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponseDto> me(@RequestBody  String token){
+        if(token == null){
+            return ResponseEntity.badRequest().body(new ApiResponseDto(false,"에러",null));
+        }
+        try{
+            boolean isInvalid = loginService.validateToken(token);
+            if(isInvalid){
+                return ResponseEntity.ok(new ApiResponseDto(true,"유효한 토큰",null));
+            }
+            return ResponseEntity.ok(new ApiResponseDto(false,"유효하지않은 토큰",null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDto(false,"서버 에러",null));
+        }
+    }
 }

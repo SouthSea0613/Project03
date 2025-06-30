@@ -32,4 +32,11 @@ public class LoginService {
         String token = jwtUtil.createToken(username, userOptional.get().getRole());
         return token;
     }
+
+    public boolean validateToken(String token) {
+        if(jwtUtil.validateToken(token)){
+            return false;
+        }
+        return true;
+    }
 }
