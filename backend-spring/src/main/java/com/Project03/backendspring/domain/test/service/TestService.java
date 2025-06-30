@@ -1,4 +1,4 @@
-package com.Project03.backendspring.domain.test;
+package com.Project03.backendspring.domain.test.service;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;

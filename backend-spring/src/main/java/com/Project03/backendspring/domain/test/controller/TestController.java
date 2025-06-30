@@ -1,5 +1,6 @@
-package com.Project03.backendspring.domain.test;
+package com.Project03.backendspring.domain.test.controller;
 
+import com.Project03.backendspring.domain.test.service.TestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,7 @@
 package com.Project03.backendspring.domain.user.service;
 
-import com.Project03.backendspring.domain.user.dto.AuthRequestDto;
+import com.Project03.backendspring.domain.user.dto.request.LoginDto;
+import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.entity.UserRole;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
@@ -13,38 +14,44 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public void signup(AuthRequestDto.Signup requestDto) {
-        if (userRepository.existsByUsername(requestDto.getUsername())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+    public boolean signup(SignUpDto signUpDto) {
+        try {
+            if (userRepository.existsByUsername(signUpDto.getUsername())) {
+                return false;
+            }
+
+            if (userRepository.existsByEmail(signUpDto.getEmail())) {
+                return false;
+            }
+
+            User user = User.builder()
+                    .username(signUpDto.getUsername())
+                    .password(passwordEncoder.encode(signUpDto.getPassword()))
+                    .name(signUpDto.getName())
+                    .email(signUpDto.getEmail())
+                    .postcode(signUpDto.getPostcode())
+                    .address(signUpDto.getAddress())
+                    .detailAddress(signUpDto.getDetailAddress())
+                    .userRole(UserRole.USER)
+                    .build();
+
+
+            userRepository.save(user);
+            return true;
         }
-        if (userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        catch (Exception e) {
+            return false;
         }
-
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
-
-        User user = User.builder()
-                .username(requestDto.getUsername())
-                .password(encodedPassword)
-                .name(requestDto.getName())
-                .email(requestDto.getEmail())
-                .postcode(requestDto.getPostcode())
-                .address(requestDto.getAddress())
-                .detailAddress(requestDto.getDetailAddress())
-                .userRole(UserRole.USER) // 기본 역할은 USER
-                .build();
-
-        userRepository.save(user);
     }
 
-    public String login(AuthRequestDto.Login requestDto) {
-        User user = userRepository.findByUsername(requestDto.getUsername())
+    public String login(LoginDto requestDto) {
+        User user = userRepository
+                .findByUsername(requestDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {

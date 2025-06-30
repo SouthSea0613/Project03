@@ -1,6 +1,8 @@
 package com.Project03.backendspring.domain.user.controller;
 
-import com.Project03.backendspring.domain.user.dto.AuthRequestDto;
+import com.Project03.backendspring.common.dto.response.MessageDto;
+import com.Project03.backendspring.domain.user.dto.request.LoginDto;
+import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,24 +14,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody AuthRequestDto.Signup requestDto) {
+    public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
         try {
-            authService.signup(requestDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
+            if(authService.signup(signUpDto)) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "회원가입 성공"));
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageDto(false, "잘못된 요청"));
+            }
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false, "통신 에러"));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequestDto.Login requestDto, HttpServletResponse response) {
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         try {
-            String token = authService.login(requestDto);
-            response.addHeader("Authorization", token);
+            String token = authService.login(loginDto);
+            httpServletResponse.addHeader("Authorization", token);
             return ResponseEntity.ok("로그인 성공");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

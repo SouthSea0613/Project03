@@ -1,13 +1,13 @@
 package com.Project03.backendspring.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "tb_user")
 public class User {
     @Id
@@ -39,17 +39,5 @@ public class User {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-
-    @Builder
-    public User(String username, String password, String name, String email, String postcode, String address, String detailAddress, UserRole userRole) {
-        this.username = username;
-        this.password = password;
-        this.name = name;
-        this.email = email;
-        this.postcode = postcode;
-        this.address = address;
-        this.detailAddress = detailAddress;
-        this.userRole = userRole;
-    }
 }
 

@@ -53,8 +53,7 @@ function Home() {
         localStorage.removeItem('jwt');
         router.push('/login');
     };
-
-
+    
     if (!userProfile) {
         return null;
     }
