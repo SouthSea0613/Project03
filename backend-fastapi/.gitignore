@@ -1,15 +1,6 @@
 
 ### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+__pycache__
 
 ### IntelliJ IDEA ###
 .idea
