@@ -20,19 +20,21 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto> login(@RequestBody UserDto userDto){
         if(userDto.getUsername() == null | userDto.getPassword() == null){
-            return ResponseEntity.badRequest().body(new ApiResponseDto(false,"에러"));
+            return ResponseEntity.badRequest().body(new ApiResponseDto(false,"에러",null));
         }
         log.info("로그인 컨트롤러");
         try{
+            log.info("컨트롤러 비밀번호:{}",userDto.getPassword());
             String userToken  = loginService.login(userDto.getUsername(),userDto.getPassword());
             if(userToken !=null){
-                return ResponseEntity.ok(new ApiResponseDto(true,"로그인 성공"));
+                return ResponseEntity.ok(new ApiResponseDto(true,"로그인 성공",userToken));
             }
-            return ResponseEntity.ok(new ApiResponseDto(false,"로그인 실패"));
+
+            return ResponseEntity.ok(new ApiResponseDto(false,"로그인 실패",null));
 
         }catch (Exception e){
             System.err.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDto(false,"서버 에러"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDto(false,"서버 에러",null));
         }
 
     }

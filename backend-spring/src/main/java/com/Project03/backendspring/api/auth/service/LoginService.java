@@ -20,7 +20,7 @@ public class LoginService {
     private final JwtUtil jwtUtil;
     public String login(String username, String password) {
         Optional<UserEntity> userOptional  = authRepository.findByUsername(username);
-        log.info(password);
+        log.info("비밀번호:{}",password);
         if(userOptional.isEmpty()){
             return null;
         }

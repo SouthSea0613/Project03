@@ -23,7 +23,7 @@ public class RegisterController {
     public ResponseEntity<ApiResponseDto> signup(@RequestBody UserDto userDto) {
         log.info("회원가입 컨트롤러");
         if(userDto==null){
-            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"에러");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"에러",null);
             return ResponseEntity.badRequest().body(apiResponseDto);
         }
         try{
@@ -31,15 +31,15 @@ public class RegisterController {
             UserEntity userinfo = registerService.signup(userDto);
             if(userinfo==null){
                 log.info("회원가입 실패");
-                ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 실패");
+                ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 실패",null);
                 return ResponseEntity.ok(apiResponseDto);
             }
             log.info("회원가입 성공");
-            ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 성공");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(true,"회원가입 성공",null);
             return ResponseEntity.ok(apiResponseDto);
         }catch (Exception e){
             System.err.println(e.getMessage());
-            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"서버 에러");
+            ApiResponseDto apiResponseDto = new ApiResponseDto(false,"서버 에러",null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDto);
         }
     }
