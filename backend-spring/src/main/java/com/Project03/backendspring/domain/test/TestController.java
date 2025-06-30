@@ -1,4 +1,4 @@
-package com.Project03.backendspring.api.test;
+package com.Project03.backendspring.domain.test;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
