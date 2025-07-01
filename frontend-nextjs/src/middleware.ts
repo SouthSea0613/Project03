@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
         console.error('JWT Verification Error:', error);
 
-        const response = NextResponse.redirect(new URL('/login', request.url));
+        const response = NextResponse.redirect(new URL('', request.url));
         response.cookies.delete('jwt');
         return response;
     }

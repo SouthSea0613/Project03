@@ -23,9 +23,9 @@ function Home() {
 
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/user/me`,
+                    `${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/auth/user/me`,
                     {
-                        method: 'GET',
+                        method: 'POST',
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -51,7 +51,7 @@ function Home() {
 
     const handleLogout = () => {
         localStorage.removeItem('jwt');
-        router.push('/login');
+        router.push('/auth/login');
     };
 
 
