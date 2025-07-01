@@ -60,4 +60,11 @@ public class AuthService {
 
         return jwtUtil.createToken(user.getUsername(), user.getUserRole().name());
     }
+
+    public boolean checkUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            return false;
+        }
+        return true;
+    }
 }

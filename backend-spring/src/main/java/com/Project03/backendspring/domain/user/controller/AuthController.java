@@ -34,13 +34,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         try {
             String token = authService.login(loginDto);
             httpServletResponse.addHeader("Authorization", token);
-            return ResponseEntity.ok("로그인 성공");
+            return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "로그인 성공"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(true, "로그인 실패"));
         }
     }
     @PostMapping("/user/me")
@@ -49,4 +49,23 @@ public class AuthController {
 //        SignupRequestDto user = userDetails.getUsername()
         return ResponseEntity.ok(new MessageDto(true,"유효한 토큰 & user 정보 조회"));
     }
+    @PostMapping("/checkUsername")
+    @ResponseBody
+    public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
+        if(signUpDto.getUsername() == null){
+            MessageDto responseDto = new MessageDto();
+            return ResponseEntity.badRequest().body(responseDto);
+        }
+        try{
+            boolean isAvailable = authService.checkUsername(signUpDto.getUsername());
+            String message = isAvailable?"사용 가능한 아이디입니다.":"이미 사용중인 아이디입니다.";
+            MessageDto responseDto = new MessageDto(isAvailable,message);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            MessageDto responseDto = new MessageDto(false,"아이디 중복 확인 중 오류 발생");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
+
 }
