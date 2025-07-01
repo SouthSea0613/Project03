@@ -13,7 +13,7 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
-        springFetcher('/api/login', {
+        springFetcher('/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,16 +25,9 @@ export default function LoginPage() {
         })
             .then(res => {
                 console.log(res)
-                if (!res.ok) {
-                    throw new Error('로그인 요청에 실패했습니다.');
-                }
-
-                if (res.data.token) {
-                    Cookies.set('jwt', res.data.token, {path: '/'});
-                    alert("로그인 성공!");
-                    router.push("/");
-                }
-                location.href = '/'
+                alert("로그인 성공!");
+                router.push("/");
+                console.log(res.headers.get('Authorization'))
             })
             .catch(err => {
                 console.error("로그인 실패:", err);

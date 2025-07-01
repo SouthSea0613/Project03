@@ -9,7 +9,7 @@ export default function AuthInitializer() {
     const [isLoading,setIsLoading] = useState(true)
     useEffect(() => {
         const checkLogin = () =>{
-            const token = localStorage.getItem('token')
+            
             if(token==null){
                 setIsLoading(false)
                 return;

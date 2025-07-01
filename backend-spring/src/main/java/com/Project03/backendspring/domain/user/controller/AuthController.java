@@ -5,8 +5,10 @@ import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 import com.Project03.backendspring.domain.user.service.AuthService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     private final AuthService authService;
 
@@ -34,13 +37,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         try {
             String token = authService.login(loginDto);
-            httpServletResponse.addHeader("Authorization", token);
+            httpServletResponse.setHeader("Authorization", token);
             return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "로그인 성공"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(true, "로그인 실패"));
+            log.info("테스트");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
         }
     }
     @PostMapping("/user/me")

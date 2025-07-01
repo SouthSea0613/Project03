@@ -24,13 +24,15 @@ export async function middleware(request: NextRequest) {
 
     try {
         const secret = new TextEncoder().encode(JWT_SECRET_KEY);
+        console.log(secret);
+        console.log(token);
         await jwtVerify(token, secret);
 
         return NextResponse.next();
     } catch (error) {
         console.error('JWT Verification Error:', error);
 
-        const response = NextResponse.redirect(new URL('', request.url));
+        const response = NextResponse.redirect(new URL('/auth/signup', request.url));
         response.cookies.delete('jwt');
         return response;
     }

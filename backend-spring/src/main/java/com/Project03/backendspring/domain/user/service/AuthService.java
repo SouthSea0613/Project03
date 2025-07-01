@@ -7,12 +7,14 @@ import com.Project03.backendspring.domain.user.entity.UserRole;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
 import com.Project03.backendspring.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

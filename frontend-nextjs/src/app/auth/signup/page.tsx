@@ -17,7 +17,7 @@ export default function Signup() {
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        springFetcher('/api/signup',{
+        springFetcher('/api/auth/signup',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default function Signup() {
             })
     }
     const checkUsername = () => {
-        springFetcher('/api/checkusername',{
+        springFetcher('/api/auth/checkUsername',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -59,14 +59,30 @@ export default function Signup() {
             console.log(err )
         })
     }
+    const checkEmail = () =>{
+        springFetcher('/api/auth/checkEmail',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+            })
+        }).then(res => {
+            console.log(res)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    }
     return (
         <section>
             <input type="text" placeholder="아이디" onChange={(e) => setUsername(e.target.value)}/>
-            <input type="button" placeholder="중복확인" onClick={checkUsername}/>
+            <input type="button" value="중복확인" onClick={checkUsername}/>
             <input type="password" placeholder="비밀번호" onChange={(e) => setPassword(e.target.value)}/>
             <input type="password" placeholder="비밀번호를 다시 입력해주세요" onChange={(e) => setCheckpassword(e.target.value)}/>
             <input type="text" placeholder="이름을 입력해주세요" onChange={(e) => setName(e.target.value)}/>
-            <input type="text" placeholder="이메일 주소" onChange={(e) => setEmail(e.target.value)}/>
+            <input type="text" placeholder="이메일 주소" onBlur={checkEmail} onChange={(e) => setEmail(e.target.value)}/>
             <input type="text" placeholder="우편번호" onChange={(e) => setPostcode(e.target.value)}/>
             <input type="text" placeholder="주소" onChange={(e) => setAddress(e.target.value)}/>
             <input type="text" placeholder="상세주소" onChange={(e) => setDetailaddress(e.target.value)}/>
