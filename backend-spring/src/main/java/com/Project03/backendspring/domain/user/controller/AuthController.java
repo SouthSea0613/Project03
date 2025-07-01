@@ -1,5 +1,6 @@
 package com.Project03.backendspring.domain.user.controller;
 
+
 import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
@@ -8,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,5 +42,11 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
+    }
+    @PostMapping("/user/me")
+    public ResponseEntity<MessageDto> getUserInfo(@AuthenticationPrincipal UserDetails userDetails){
+//        String username = userDetails.getUsername();
+//        SignupRequestDto user = userDetails.getUsername()
+        return ResponseEntity.ok(new MessageDto(true,"유효한 토큰 & user 정보 조회"));
     }
 }
