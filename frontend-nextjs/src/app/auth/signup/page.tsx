@@ -1,66 +1,76 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { springFetcher } from '@/lib/api';
+import {useState} from "react";
+import { springFetcher, fastApiFetcher } from '@/lib/api';
+import {useRouter} from "next/navigation";
 
-export default function SignupPage() {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        name: '',
-        email: '',
-        postcode: '',
-        address: '',
-        detailAddress: '',
-    });
+export default function Signup() {
+    const [username,setUsername] = useState('')
+    const [password,setPassword] = useState('')
+    const [checkpassword,setCheckpassword] = useState('')
+    const [name,setName] = useState('')
+    const [email,setEmail] = useState('')
+    const [postcode,setPostcode] = useState('')
+    const [address,setAddress] = useState('')
+    const [detail_address,setDetailaddress] = useState('')
     const [error, setError] = useState('');
     const router = useRouter();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        try {
-            await springFetcher('/api/auth/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+        springFetcher('/api/signup',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username,
+                password,
+                name,
+                email,
+                postcode,
+                address,
+                detail_address,
+
+            })
+        }).then(res => {
+            console.log(res)
+            console.log("연결됐당")
             alert('회원가입 성공! 로그인 페이지로 이동합니다.');
             router.push('/auth/login');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.');
-        }
-    };
-
+        })
+            .catch(err => {
+                console.log(err)
+                console.log("연결안됐어")
+                setError(err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.');
+            })
+    }
+    const checkUsername = () => {
+        springFetcher('/api/checkusername',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username,
+            })
+        }).then(res => {
+            console.log(res)
+        }).catch(err => {
+            console.log(err )
+        })
+    }
     return (
-        <div style={{ maxWidth: '400px', margin: 'auto', padding: '20px' }}>
-            <h1>회원가입</h1>
-            <form onSubmit={handleSubmit}>
-                {Object.keys(formData).map((key) => (
-                    <div key={key} style={{ marginBottom: '10px' }}>
-                        <label>
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                            <input
-                                type={key === 'password' ? 'password' : 'text'}
-                                name={key}
-                                value={formData[key as keyof typeof formData]}
-                                onChange={handleChange}
-                                required={key !== 'detailAddress'}
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                            />
-                        </label>
-                    </div>
-                ))}
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button type="submit" style={{ width: '100%', padding: '10px', background: 'blue', color: 'white', border: 'none' }}>
-                    가입하기
-                </button>
-            </form>
-        </div>
-    );
+        <section>
+            <input type="text" placeholder="아이디" onChange={(e) => setUsername(e.target.value)}/>
+            <input type="button" placeholder="중복확인" onClick={checkUsername}/>
+            <input type="password" placeholder="비밀번호" onChange={(e) => setPassword(e.target.value)}/>
+            <input type="password" placeholder="비밀번호를 다시 입력해주세요" onChange={(e) => setCheckpassword(e.target.value)}/>
+            <input type="text" placeholder="이름을 입력해주세요" onChange={(e) => setName(e.target.value)}/>
+            <input type="text" placeholder="이메일 주소" onChange={(e) => setEmail(e.target.value)}/>
+            <input type="text" placeholder="우편번호" onChange={(e) => setPostcode(e.target.value)}/>
+            <input type="text" placeholder="주소" onChange={(e) => setAddress(e.target.value)}/>
+            <input type="text" placeholder="상세주소" onChange={(e) => setDetailaddress(e.target.value)}/>
+            <button onClick={handleSubmit}>회원가입</button>
+        </section>
+    )
 }
