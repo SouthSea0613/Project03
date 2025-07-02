@@ -10,7 +10,7 @@ interface UserProfile {
     email: string;
 }
 
-function Home() {
+function Home({ user }: { user: { username: string, email: string } }) {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const router = useRouter();
 
@@ -59,12 +59,12 @@ function Home() {
 
     return (
         <main style={{ padding: '20px' }}>
-            {/*<h1>환영합니다, {userProfile.name}님!</h1>*/}
-            {/*<p>이메일: {userProfile.email}</p>*/}
-            {/*<button onClick={handleLogout} style={{ marginTop: '20px' }}>*/}
-            {/*    로그아웃*/}
-            {/*</button>*/}
-            뭘까
+            { user ? (
+                    <h1>환영합니다, {user.username}님!</h1>
+            ):(
+                <p>데이터 없음</p>
+            )}
+
         </main>
     );
 }

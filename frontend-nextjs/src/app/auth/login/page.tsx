@@ -22,6 +22,7 @@ export default function LoginPage() {
                 username,
                 password,
             }),
+            credentials: 'include',
         })
             .then(res => {
                 console.log(res)
