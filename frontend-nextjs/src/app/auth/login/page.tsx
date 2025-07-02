@@ -21,13 +21,13 @@ export default function LoginPage() {
             body: JSON.stringify({
                 username,
                 password,
-            })
+            }),
+            credentials: 'include',
         })
             .then(res => {
                 console.log(res)
                 alert("로그인 성공!");
                 router.push("/");
-                console.log(res.headers.get('Authorization'))
             })
             .catch(err => {
                 console.error("로그인 실패:", err);

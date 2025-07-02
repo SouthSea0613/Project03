@@ -11,11 +11,12 @@ export const config = {
 };
 
 export async function middleware(request: NextRequest) {
-    const token = request.headers.get('Authorization')?.split(' ')[1] || request.cookies.get('jwt')?.value;
+    const token = request.cookies.get('token')?.value;
 
     const { pathname } = request.nextUrl;
-
-    if (!token) {
+    console.log("토큰이야"+token);
+    if (token==null) {
+        console.log("토큰있어?")
         if (pathname !== '/login') {
             return NextResponse.redirect(new URL('/auth/login', request.url));
         }
@@ -24,16 +25,16 @@ export async function middleware(request: NextRequest) {
 
     try {
         const secret = new TextEncoder().encode(JWT_SECRET_KEY);
-        console.log(secret);
-        console.log(token);
+        console.log("시크릿"+ secret);
+        console.log("토큰" +token);
         await jwtVerify(token, secret);
 
         return NextResponse.next();
     } catch (error) {
         console.error('JWT Verification Error:', error);
 
-        const response = NextResponse.redirect(new URL('/auth/signup', request.url));
-        response.cookies.delete('jwt');
+        const response = NextResponse.redirect(new URL('/', request.url));
+        response.cookies.delete('token');
         return response;
     }
 }

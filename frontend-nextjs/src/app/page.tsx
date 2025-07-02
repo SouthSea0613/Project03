@@ -16,7 +16,7 @@ function Home() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const token = Cookies.get('jwt');
+            const token = Cookies.get('token');
             if (!token) {
                 return;
             }
@@ -50,10 +50,9 @@ function Home() {
     }, [router]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
         router.push('/auth/login');
     };
-    
+
     if (!userProfile) {
         return null;
     }
