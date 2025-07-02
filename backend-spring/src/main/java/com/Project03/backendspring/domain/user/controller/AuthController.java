@@ -48,7 +48,7 @@ public class AuthController {
     public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         try {
             String token = authService.login(loginDto);
-            httpServletResponse.setHeader("Authorization", token);
+            httpServletResponse.setHeader("Authorization", "Bearer "+token);
             log.info(token);
             ResponseCookie cookie = ResponseCookie.from("token",token)
                     .maxAge(3600)
@@ -58,6 +58,7 @@ public class AuthController {
                     .sameSite("None")
                     .build();
             log.info("cookie {}", cookie);
+            log.info(httpServletResponse.getHeader("Authorization"));
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
