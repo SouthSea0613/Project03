@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -27,14 +28,13 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        byte[] bytes = Base64.getDecoder().decode(secretKey);
-        key = Keys.hmacShaKeyFor(bytes);
+        byte[] bytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        this.key = Keys.hmacShaKeyFor(bytes);
     }
 
     public String createToken(String username, String role) {
         Date date = new Date();
-        return BEARER_PREFIX +
-                Jwts.builder()
+        return Jwts.builder()
                         .setSubject(username)
                         .claim("role", role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
