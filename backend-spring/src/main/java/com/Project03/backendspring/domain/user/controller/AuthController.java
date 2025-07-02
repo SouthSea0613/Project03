@@ -49,6 +49,7 @@ public class AuthController {
         try {
             String token = authService.login(loginDto);
             httpServletResponse.setHeader("Authorization", token);
+            log.info(token);
             ResponseCookie cookie = ResponseCookie.from("token",token)
                     .maxAge(3600)
                     .path("/")
@@ -56,6 +57,7 @@ public class AuthController {
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
+            log.info("cookie {}", cookie);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정

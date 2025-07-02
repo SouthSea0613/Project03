@@ -18,7 +18,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String BEARER_PREFIX = "Bearer ";
+    public static final String BEARER_PREFIX = "Bearer";
     private final long TOKEN_TIME = 60 * 60 * 1000L;
 
     @Value("${jwt.secret.key}")
@@ -34,7 +34,7 @@ public class JwtUtil {
 
     public String createToken(String username, String role) {
         Date date = new Date();
-        return Jwts.builder()
+        return BEARER_PREFIX + Jwts.builder()
                         .setSubject(username)
                         .claim("role", role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
