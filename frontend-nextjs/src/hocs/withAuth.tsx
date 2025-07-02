@@ -16,10 +16,14 @@ const withAuth = (WrappedComponent: React.ComponentType<any>) => {
         useEffect(() => {
                 springFetcher('/api/auth/user/me',{
                     method: 'GET',
+                    // headers: {
+                    //     'Content-Type': 'application/json',
+                    //     'Authorization': 'Bearer ' + token
+                    // },
                     credentials:'include'
                 }).then(res => {
                     console.log(res);
-                    setUser(res.data)
+                    setUser(res.data.data)
                     setIsLoggedIn(true);
                     setIsAuthenticated(true);
                 }).catch(err => {
