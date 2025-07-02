@@ -5,7 +5,9 @@ import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 //import com.Project03.backendspring.domain.user.entity.User;
+import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
+import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -62,10 +64,10 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
         }
     }
-    @PostMapping("/user/me")
-    public ResponseEntity<MessageDto> getUserInfo(@AuthenticationPrincipal UserDetails userDetails){
-        String username = userDetails.getUsername();
-//        User user = userDetails.getUser();
+    @GetMapping("/user/me")
+    public ResponseEntity<MessageDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        User user = userDetails.getUser();
+        log.info(String.valueOf(user));
         return ResponseEntity.ok(new MessageDto(true,"유효한 토큰 & user 정보 조회"));
     }
     @PostMapping("/checkUsername")
