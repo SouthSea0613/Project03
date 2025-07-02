@@ -4,12 +4,15 @@ package com.Project03.backendspring.domain.user.controller;
 import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
+//import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +28,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
         try {
+            log.info("signup");
             if(authService.signup(signUpDto)) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "회원가입 성공"));
             }
@@ -41,20 +45,30 @@ public class AuthController {
         try {
             String token = authService.login(loginDto);
             httpServletResponse.setHeader("Authorization", token);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "로그인 성공"));
+            ResponseCookie cookie = ResponseCookie.from("token",token)
+                    .maxAge(3600)
+                    .path("/")
+                    .secure(true)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .build();
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
+                    .body(new MessageDto(true, "로그인 성공"));
         } catch (IllegalArgumentException e) {
             log.info("테스트");
+            log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
         }
     }
     @PostMapping("/user/me")
     public ResponseEntity<MessageDto> getUserInfo(@AuthenticationPrincipal UserDetails userDetails){
-//        String username = userDetails.getUsername();
-//        SignupRequestDto user = userDetails.getUsername()
+        String username = userDetails.getUsername();
+//        User user = userDetails.getUser();
         return ResponseEntity.ok(new MessageDto(true,"유효한 토큰 & user 정보 조회"));
     }
     @PostMapping("/checkUsername")
-    @ResponseBody
     public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
         if(signUpDto.getUsername() == null){
             MessageDto responseDto = new MessageDto();
@@ -69,6 +83,20 @@ public class AuthController {
             System.err.println(e.getMessage());
             MessageDto responseDto = new MessageDto(false,"아이디 중복 확인 중 오류 발생");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
+
+    @PostMapping("/checkEmail")
+    public ResponseEntity<MessageDto> checkEmail(@RequestBody SignUpDto signUpDto) {
+        if(signUpDto.getEmail() == null){
+            return ResponseEntity.badRequest().body(new MessageDto(false,"잘못된 요청"));
+        }
+        try{
+            boolean isAvailable = authService.checkEmail(signUpDto.getEmail());
+            String message = isAvailable?"사용 가능한 이메일입니다.":"이미 사용중인 이메일입니다.";
+            return ResponseEntity.ok(new MessageDto(isAvailable,message));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false,"아이디 중복 확인 중 오류 발생"));
         }
     }
 
