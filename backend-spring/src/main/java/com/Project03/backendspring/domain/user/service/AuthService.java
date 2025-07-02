@@ -38,11 +38,10 @@ public class AuthService {
                     .email(signUpDto.getEmail())
                     .postcode(signUpDto.getPostcode())
                     .address(signUpDto.getAddress())
-                    .detailAddress(signUpDto.getDetailAddress())
+                    .detailAddress(signUpDto.getDetail_address())
                     .userRole(UserRole.USER)
                     .build();
-
-
+            log.info(user.toString());
             userRepository.save(user);
             return true;
         }
@@ -51,12 +50,12 @@ public class AuthService {
         }
     }
 
-    public String login(LoginDto requestDto) {
+    public String login(LoginDto loginDto) {
         User user = userRepository
-                .findByUsername(requestDto.getUsername())
+                .findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
@@ -65,6 +64,13 @@ public class AuthService {
 
     public boolean checkUsername(String username) {
         if (userRepository.existsByUsername(username)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkEmail(String email) {
+        if(userRepository.existsByEmail(email)) {
             return false;
         }
         return true;

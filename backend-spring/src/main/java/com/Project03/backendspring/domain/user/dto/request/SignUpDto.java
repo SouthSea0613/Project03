@@ -16,5 +16,5 @@ public class SignUpDto {
     private String email;
     private String postcode;
     private String address;
-    private String detailAddress;
+    private String detail_address;
 }
