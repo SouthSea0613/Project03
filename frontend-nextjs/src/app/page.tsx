@@ -14,58 +14,60 @@ function Home() {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const token = Cookies.get('token');
-            if (!token) {
-                return;
-            }
+    // useEffect(() => {
+    //     const fetchProfile = async () => {
+    //         const token = Cookies.get('token');
+    //         if (!token) {
+    //             return;
+    //         }
+    //
+    //         try {
+    //             const response = await fetch(
+    //                 `${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/auth/user/me`,
+    //                 {
+    //                     method: 'POST',
+    //                     headers: {
+    //                         Authorization: `Bearer ${token}`,
+    //                     },
+    //                 }
+    //             );
+    //
+    //             if (!response.ok) {
+    //                 throw new Error('프로필 정보를 가져오는데 실패했습니다.');
+    //             }
+    //
+    //             const profileData: UserProfile = await response.json();
+    //             setUserProfile(profileData);
+    //
+    //         } catch (error) {
+    //             console.error(error);
+    //             // Cookies.remove('jwt');
+    //             // router.replace('/auth/login');
+    //         }
+    //     };
+    //
+    //     fetchProfile();
+    // }, [router]);
 
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_SPRING_API_URL}/api/auth/user/me`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error('프로필 정보를 가져오는데 실패했습니다.');
-                }
-
-                const profileData: UserProfile = await response.json();
-                setUserProfile(profileData);
-
-            } catch (error) {
-                console.error(error);
-                Cookies.remove('jwt');
-                router.replace('/auth/login');
-            }
-        };
-
-        fetchProfile();
-    }, [router]);
-
-    const handleLogout = () => {
-        router.push('/auth/login');
-    };
-
-    if (!userProfile) {
-        return null;
-    }
+    // const handleLogout = () => {
+    //     router.push('/auth/login');
+    // };
+    //
+    // if (!userProfile) {
+    //     return null;
+    // }
 
     return (
         <main style={{ padding: '20px' }}>
-            <h1>환영합니다, {userProfile.name}님!</h1>
-            <p>이메일: {userProfile.email}</p>
-            <button onClick={handleLogout} style={{ marginTop: '20px' }}>
-                로그아웃
-            </button>
+            {/*<h1>환영합니다, {userProfile.name}님!</h1>*/}
+            {/*<p>이메일: {userProfile.email}</p>*/}
+            {/*<button onClick={handleLogout} style={{ marginTop: '20px' }}>*/}
+            {/*    로그아웃*/}
+            {/*</button>*/}
+            뭘까
         </main>
     );
 }
 
 export default withAuth(Home);
+// export default Home;
