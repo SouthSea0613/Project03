@@ -2,7 +2,6 @@
 import {useState} from "react";
 import {springFetcher} from "@/lib/api";
 import {useRouter} from "next/navigation";
-import Cookies from "js-cookie";
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')

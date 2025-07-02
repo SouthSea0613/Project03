@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import withAuth from '../hocs/withAuth';
 
 interface UserProfile {
@@ -70,4 +69,3 @@ function Home() {
 }
 
 export default withAuth(Home);
-// export default Home;
