@@ -7,6 +7,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET;
 export const config = {
     matcher: [
         '/((?!api|_next/static|_next/image|favicon.ico|auth/).*)',
+        '/'
     ],
 };
 
@@ -15,10 +16,11 @@ export async function middleware(request: NextRequest) {
     const fullUrl = request.url;
 
     const { pathname } = request.nextUrl;
+    const allowedPaths = ['/','/auth/login', '/auth/signup'];
     console.log("토큰이야"+token);
-    if (token==null) {
+    if (!token) {
         console.log("토큰있어?")
-        if (pathname !== '/login') {
+        if (!allowedPaths.includes(pathname) && !pathname.startsWith('/auth/login')) {
             return NextResponse.redirect(new URL('/auth/login', request.url));
         }
         return NextResponse.next();

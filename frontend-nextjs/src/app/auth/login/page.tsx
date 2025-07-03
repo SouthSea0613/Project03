@@ -1,9 +1,10 @@
 'use client'
-import {useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {springFetcher} from "@/lib/api";
 import {useRouter} from "next/navigation";
 import { usePathname } from 'next/navigation';
 import Cookies from "js-cookie";
+import AuthContext, {useAuth} from "@/context/AuthContext";
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
@@ -11,7 +12,9 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const router = useRouter();
     const url = usePathname();
+    const {checkAuth,isLoggedIn} = useAuth();
     const handleSubmit = async (e: React.FormEvent) => {
+
         e.preventDefault();
         setError('');
 
@@ -26,11 +29,13 @@ export default function LoginPage() {
             }),
             credentials: 'include',
         })
-            .then(res => {
+            .then( res => {
                 console.log(res)
                 alert("로그인 성공!");
-                console.log(url)
+                checkAuth();
                 router.push("/");
+                console.log(url)
+                console.log(isLoggedIn)
             })
             .catch(err => {
                 console.error("로그인 실패:", err);
@@ -38,7 +43,7 @@ export default function LoginPage() {
             })
     }
     return (
-        <section>
+        <section className="bg-myColor">
             <input type="text" placeholder="아이디" onChange={(e) => setUsername(e.target.value)}/>
             <input type="password" placeholder="비밀번호" onChange={(e) => setPassword(e.target.value)}/>
             <input type="button" onClick={handleSubmit} value="로그인"/>

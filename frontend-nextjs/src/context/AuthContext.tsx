@@ -27,7 +27,7 @@ const AuthProvider = ({ children }:{children:React.ReactNode}) => {
     const [user,setUser] = useState<User | null>(null)
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading,setIsLoading] = useState(true)
-    const checkAuth = (()=>{
+    const checkAuth = useCallback(async ()=>{
         springFetcher('/api/auth/user/me',{
             method: 'GET',
             credentials:'include'
@@ -40,8 +40,10 @@ const AuthProvider = ({ children }:{children:React.ReactNode}) => {
             console.log(err);
             setUser(null)
             setIsLoggedIn(false);
+        }).finally(()=>{
+            setIsLoading(false)
         })
-    })
+    },[])
     useEffect(() => {
        checkAuth();
     }, [checkAuth]);

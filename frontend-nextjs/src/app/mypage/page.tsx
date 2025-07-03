@@ -1,7 +1,5 @@
 'use client';
 
-import withAuth from '@/hocs/withAuth';
-
 function MyPage() {
     // 이 컴포넌트는 withAuth HOC에 의해 인증된 사용자만 볼 수 있습니다.
 
@@ -17,4 +15,4 @@ function MyPage() {
 }
 
 // MyPage 컴포넌트를 withAuth로 감싸서 export 합니다.
-export default withAuth(MyPage);
+export default MyPage;
