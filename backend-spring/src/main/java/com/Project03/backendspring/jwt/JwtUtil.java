@@ -3,6 +3,7 @@ package com.Project03.backendspring.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class JwtUtil {
 
     public String createToken(String username, String role) {
         Date date = new Date();
-        return BEARER_PREFIX + Jwts.builder()
+        return Jwts.builder()
                         .setSubject(username)
                         .claim("role", role)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
@@ -70,4 +71,16 @@ public class JwtUtil {
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
+
+    public String getTokenFromCookie(HttpServletRequest httpServletRequest) {
+
+        Cookie[] cookies = httpServletRequest.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("token")) { // 쿠키 이름이 "token"인 경우
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;}
 }

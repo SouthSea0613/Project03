@@ -2,12 +2,14 @@
 import {useState} from "react";
 import {springFetcher} from "@/lib/api";
 import {useRouter} from "next/navigation";
+import { usePathname } from 'next/navigation';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('');
     const router = useRouter();
+    const url = usePathname();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -26,6 +28,7 @@ export default function LoginPage() {
             .then(res => {
                 console.log(res)
                 alert("로그인 성공!");
+                console.log(url)
                 router.push("/");
             })
             .catch(err => {
