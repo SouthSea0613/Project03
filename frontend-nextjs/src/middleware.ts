@@ -12,6 +12,7 @@ export const config = {
 
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get('token')?.value;
+    const fullUrl = request.url;
 
     const { pathname } = request.nextUrl;
     console.log("토큰이야"+token);
@@ -28,7 +29,8 @@ export async function middleware(request: NextRequest) {
         console.log("시크릿"+ secret);
         console.log("토큰" +token);
         await jwtVerify(token, secret);
-
+        console.log(fullUrl)
+        console.log(pathname)
         return NextResponse.next();
     } catch (error) {
         console.error('JWT Verification Error:', error);
