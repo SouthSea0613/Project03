@@ -56,6 +56,7 @@ public class AuthController {
                     .build();
             log.info("cookie {}", cookie);
             log.info(httpServletResponse.getHeader("Authorization"));
+            
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
@@ -72,6 +73,7 @@ public class AuthController {
         UserInfoDto userInfoDto = new UserInfoDto(user.getUsername(), user.getUsername(), user.getEmail());
         return ResponseEntity.ok(new ApiResponseDto(true,"유효한 토큰 & user 정보 조회",userInfoDto));
     }
+
     @PostMapping("/checkUsername")
     public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
         if(signUpDto.getUsername() == null){
@@ -103,5 +105,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false,"아이디 중복 확인 중 오류 발생"));
         }
     }
-
 }
