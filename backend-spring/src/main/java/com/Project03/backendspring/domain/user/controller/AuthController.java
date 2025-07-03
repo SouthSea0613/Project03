@@ -1,9 +1,11 @@
 package com.Project03.backendspring.domain.user.controller;
 
 
+import com.Project03.backendspring.common.dto.response.ApiResponseDto;
 import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
+import com.Project03.backendspring.domain.user.dto.response.UserInfoDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
@@ -44,6 +46,7 @@ public class AuthController {
         try {
             String token = authService.login(loginDto);
             httpServletResponse.setHeader("Authorization", token);
+            log.info(token);
             ResponseCookie cookie = ResponseCookie.from("token",token)
                     .maxAge(3600)
                     .path("/")
@@ -51,6 +54,7 @@ public class AuthController {
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
+            log.info("cookie {}", cookie);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
@@ -62,10 +66,10 @@ public class AuthController {
         }
     }
     @GetMapping("/user/me")
-    public ResponseEntity<MessageDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         User user = userDetails.getUser();
-        log.info(String.valueOf(user));
-        return ResponseEntity.ok(new MessageDto(true,"유효한 토큰 & user 정보 조회"));
+        UserInfoDto userInfoDto = new UserInfoDto(user.getUsername(), user.getUsername(), user.getEmail());
+        return ResponseEntity.ok(new ApiResponseDto(true,"유효한 토큰 & user 정보 조회",userInfoDto));
     }
     @PostMapping("/checkUsername")
     public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {

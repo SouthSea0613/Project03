@@ -33,7 +33,7 @@ const withAuth = (WrappedComponent: React.ComponentType<any>) => {
         }
 
         if (isAuthenticated) {
-            return <WrappedComponent {...props} />;
+            return <WrappedComponent {...props} user={user} isLoggedIn={isLoggedIn} />;
         }
 
         return null;
