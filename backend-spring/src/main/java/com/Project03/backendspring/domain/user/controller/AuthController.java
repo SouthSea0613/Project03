@@ -5,12 +5,10 @@ import com.Project03.backendspring.common.dto.response.ApiResponseDto;
 import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
 import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
-//import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.dto.response.UserInfoDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,6 +56,7 @@ public class AuthController {
                     .build();
             log.info("cookie {}", cookie);
             log.info(httpServletResponse.getHeader("Authorization"));
+            
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
@@ -75,6 +73,7 @@ public class AuthController {
         UserInfoDto userInfoDto = new UserInfoDto(user.getUsername(), user.getUsername(), user.getEmail());
         return ResponseEntity.ok(new ApiResponseDto(true,"유효한 토큰 & user 정보 조회",userInfoDto));
     }
+
     @PostMapping("/checkUsername")
     public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
         if(signUpDto.getUsername() == null){
@@ -106,5 +105,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false,"아이디 중복 확인 중 오류 발생"));
         }
     }
-
 }

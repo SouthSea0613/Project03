@@ -1,39 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "../component/layout/Header";
-import AuthProvider, {useAuth} from "@/context/AuthContext";
+import AuthProvider from "@/context/AuthContext";
+import Header from "@/component/layout/Header";
+import Footer from "@/component/layout/Footer"; // Footer import 추가
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Project03",
-  description: "Project03",
+    title: "DevConnect - 당신의 프로젝트 파트너",
+    description: "개발자, 디자이너, 기획자를 위한 프로젝트 매칭 플랫폼",
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
+       children,
+   }: Readonly<{
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`+" bg-myColor "}
-      >
-      <AuthProvider>
-        <Header></Header>
-        {children}
-      </AuthProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="ko">
+        <body className={`${inter.className} bg-background text-text-main`}>
+        <AuthProvider>
+            <div className="flex flex-col min-h-screen">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+            </div>
+        </AuthProvider>
+        </body>
+        </html>
+    );
 }
