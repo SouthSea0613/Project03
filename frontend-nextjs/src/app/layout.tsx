@@ -8,7 +8,7 @@ import Footer from "@/component/layout/Footer"; // Footer import 추가
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "DevConnect - 당신의 프로젝트 파트너",
+    title: "Project03 - 당신의 프로젝트 파트너",
     description: "개발자, 디자이너, 기획자를 위한 프로젝트 매칭 플랫폼",
 };
 

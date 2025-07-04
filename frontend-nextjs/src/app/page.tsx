@@ -14,7 +14,7 @@ export default function Home() {
                     로 만드는 곳
                 </h1>
                 <p className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mt-6 mb-10">
-                    DevConnect는 최고의 개발자, 디자이너, 기획자를 연결하여 멋진 프로젝트를 함께 만들어나가는 플랫폼입니다.
+                    Project03은 최고의 개발자, 디자이너, 기획자를 연결하여 멋진 프로젝트를 함께 만들어나가는 플랫폼입니다.
                 </p>
                 <div className="flex justify-center space-x-4">
                     <Link
@@ -33,7 +33,7 @@ export default function Home() {
             </div>
 
             <div className="mt-24">
-                <h2 className="text-3xl font-bold text-text-main mb-12">DevConnect 작동 방식</h2>
+                <h2 className="text-3xl font-bold text-text-main mb-12">Project03 작동 방식</h2>
                 <div className="grid md:grid-cols-3 gap-8 text-left">
                     <div className="bg-gray-800 p-6 rounded-lg border border-border">
                         <h3 className="text-xl font-bold text-primary mb-2">1. 프로필 등록</h3>

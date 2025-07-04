@@ -17,7 +17,7 @@ const Header = () => {
         <header className="bg-background/80 backdrop-blur-sm border-b border-border sticky top-0 z-50 w-full">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <Link href="/" className="text-2xl font-bold text-text-main">
-                    DevConnect
+                    Project03
                 </Link>
 
                 <nav className="hidden md:flex items-center space-x-6 text-text-main">
