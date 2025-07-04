@@ -1,15 +1,13 @@
 'use client'
-import {useState} from "react";
-import {springFetcher} from "@/lib/api";
-import {useRouter} from "next/navigation";
-import { usePathname } from 'next/navigation';
+import { useState } from "react";
+import { springFetcher } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('');
     const router = useRouter();
-    const url = usePathname();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -30,10 +28,10 @@ export default function LoginPage() {
                 router.push("/");
             })
             .catch(err => {
-                console.error("로그인 실패:", err);
                 alert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
-            })
+            });
     }
+
     return (
         <section>
             <input type="text" placeholder="아이디" onChange={(e) => setUsername(e.target.value)}/>
