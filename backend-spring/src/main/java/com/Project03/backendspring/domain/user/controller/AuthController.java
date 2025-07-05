@@ -67,6 +67,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
         }
     }
+
     @GetMapping("/user/me")
     public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         User user = userDetails.getUser();

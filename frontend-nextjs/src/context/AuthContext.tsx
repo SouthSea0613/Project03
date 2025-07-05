@@ -13,7 +13,6 @@ interface AuthContextType {
     user: User | null,
     isLoading: boolean,
     isLoggedIn: boolean,
-    login: (token: string) => void;
     logout: () => void;
 }
 
@@ -42,11 +41,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         checkAuth();
     }, [checkAuth]);
 
-    const login = (token: string) => {
-        document.cookie = `token=${token}; path=/;`;
-        checkAuth();
-    };
-
     const logout = () => {
         document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         setUser(null);
@@ -56,7 +50,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         isLoading,
         isLoggedIn: !!user,
-        login,
         logout
     };
 
