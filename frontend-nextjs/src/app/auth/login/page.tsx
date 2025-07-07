@@ -15,6 +15,7 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        console.log("클릭했따")
 
         springFetcher('/api/auth/login', {
             method: 'POST',
@@ -31,8 +32,11 @@ export default function LoginPage() {
                 if(res.data.success){
                     const {accessToken} = res.data.data;
                     setAccessToken(accessToken);
-                    alert("로그인 성공!");
+                    alert(res.data.message);
                     router.push("/");
+                }else{
+                    alert(res.data.message);
+                    router.push("/auth/login");
                 }
             })
             .catch(err => {
