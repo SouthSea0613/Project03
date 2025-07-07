@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect, ComponentType } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -6,9 +6,10 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const ComponentWithAuth = (props: P) => {
         const { isAuthenticated, isLoading } = useAuth();
         const router = useRouter();
-
+        console.log(isAuthenticated, isLoading)
         useEffect(() => {
             // 로딩이 끝나고, 인증되지 않았다면 로그인 페이지로 리다이렉트
+            console.log(isAuthenticated, isLoading)
             if (!isLoading && !isAuthenticated) {
                 router.replace('/login');
             }
