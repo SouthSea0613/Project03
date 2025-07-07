@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 @Slf4j(topic = "JwtUtil")
@@ -20,8 +19,8 @@ import java.util.Date;
 public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer";
-    private final long TOKEN_TIME = 60 * 60 * 1000L;
-
+    private final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L;
+    private final long REFRESH_TOKEN_TIME = 60 * 60 * 1000L;
     @Value("${jwt.secret.key}")
     private String secretKey;
     private Key key;
@@ -32,13 +31,21 @@ public class JwtUtil {
         byte[] bytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(bytes);
     }
+    public String createAccessToken(String username, String role) {
+        return createToken(username, role, ACCESS_TOKEN_TIME);
+    }
 
-    public String createToken(String username, String role) {
+    public String createRefreshToken(String username, String role) {
+        return createToken(username, role, REFRESH_TOKEN_TIME);
+    }
+
+    public String createToken(String username, String role, long tokenTime) {
         Date date = new Date();
+
         return Jwts.builder()
                         .setSubject(username)
                         .claim("role", role)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
+                        .setExpiration(new Date(date.getTime() + tokenTime))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();

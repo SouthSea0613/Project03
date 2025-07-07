@@ -9,6 +9,7 @@ import com.Project03.backendspring.domain.user.dto.response.UserInfoDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
+import com.Project03.backendspring.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +20,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
@@ -42,31 +46,43 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         try {
-            String token = authService.login(loginDto);
-            httpServletResponse.setHeader("Authorization", "Bearer "+token);
-            log.info(token);
-            ResponseCookie cookie = ResponseCookie.from("token",token)
+            Map<String,String> tokens = authService.login(loginDto);
+            String accessToken = tokens.get("accessToken");
+            String refreshToken = tokens.get("refreshToken");
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
-            log.info("cookie {}", cookie);
-            log.info(httpServletResponse.getHeader("Authorization"));
             
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
-                    .body(new MessageDto(true, "로그인 성공"));
+                    .body(new ApiResponseDto(true, "로그인 성공",Map.of("accessToken",accessToken)));
         } catch (IllegalArgumentException e) {
             log.info("테스트");
             log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
         }
     }
+//    @PostMapping("/refresh")
+//    public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletRequest httpServletRequest) {
+//
+//
+//    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<MessageDto> logout(HttpServletResponse httpServletResponse) {
+//        try{
+//            if(jwtUtil.getTokenFromCookie()!=null){
+//
+//            }
+//        }
+//    }
+
     @GetMapping("/user/me")
     public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         User user = userDetails.getUser();

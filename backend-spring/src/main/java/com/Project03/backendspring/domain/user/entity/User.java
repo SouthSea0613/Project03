@@ -39,5 +39,8 @@ public class User {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+
+    @Column(name="refresh_token")
+    private String refreshToken;
 }
 

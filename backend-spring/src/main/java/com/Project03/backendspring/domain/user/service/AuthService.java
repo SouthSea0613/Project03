@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -49,8 +52,8 @@ public class AuthService {
             return false;
         }
     }
-
-    public String login(LoginDto loginDto) {
+    @Transactional
+    public Map<String, String> login(LoginDto loginDto) {
         User user = userRepository
                 .findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -59,7 +62,17 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtUtil.createToken(user.getUsername(), user.getUserRole().name());
+        String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        Map<String,String> tokens = new HashMap<>();
+        tokens.put("accessToken",accessToken);
+        tokens.put("refreshToken",refreshToken);
+
+        return tokens;
     }
 
     public boolean checkUsername(String username) {
