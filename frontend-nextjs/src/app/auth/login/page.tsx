@@ -3,8 +3,10 @@ import {useState} from "react";
 import {springFetcher} from "@/lib/api";
 import {useRouter} from "next/navigation";
 import { usePathname } from 'next/navigation';
+import {useAuth} from "@/context/AuthContext";
 
 export default function LoginPage() {
+    const { setAccessToken } = useAuth();
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('');
@@ -26,8 +28,12 @@ export default function LoginPage() {
             credentials: 'include',
         })
             .then(res => {
-                alert("로그인 성공!");
-                router.push("/");
+                if(res.data.success){
+                    const {accessToken} = res.data.data;
+                    setAccessToken(accessToken);
+                    alert("로그인 성공!");
+                    router.push("/");
+                }
             })
             .catch(err => {
                 console.error("로그인 실패:", err);
