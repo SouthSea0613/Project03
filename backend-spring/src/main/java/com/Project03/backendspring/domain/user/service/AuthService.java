@@ -61,18 +61,19 @@ public class AuthService {
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+        if (!userRepository.existsByRefreshToken(loginDto.getUsername())) {
+            String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
+            String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
+            user.setRefreshToken(refreshToken);
+            userRepository.save(user);
 
-        String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
-        String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
+            Map<String,String> tokens = new HashMap<>();
+            tokens.put("accessToken",accessToken);
+            tokens.put("refreshToken",refreshToken);
 
-        user.setRefreshToken(refreshToken);
-        userRepository.save(user);
-
-        Map<String,String> tokens = new HashMap<>();
-        tokens.put("accessToken",accessToken);
-        tokens.put("refreshToken",refreshToken);
-
-        return tokens;
+            return tokens;
+        }
+        return null;
     }
 
     public boolean checkUsername(String username) {
@@ -88,4 +89,12 @@ public class AuthService {
         }
         return true;
     }
+
+//    public boolean saveToken(String username, String refreshToken) {
+//        log.info(String.valueOf(userRepository.updateRefreshToken(username,refreshToken)));
+//        if(userRepository.updateRefreshToken(username,refreshToken)==0){
+//            return false;
+//        }
+//        return true;
+//    }
 }

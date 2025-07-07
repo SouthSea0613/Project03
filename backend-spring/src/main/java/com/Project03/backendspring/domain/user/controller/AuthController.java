@@ -10,6 +10,7 @@ import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
 import com.Project03.backendspring.jwt.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto) {
         try {
             Map<String,String> tokens = authService.login(loginDto);
             String accessToken = tokens.get("accessToken");
@@ -58,7 +59,7 @@ public class AuthController {
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
-            
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
@@ -69,11 +70,21 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
         }
     }
-//    @PostMapping("/refresh")
-//    public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletRequest httpServletRequest) {
-//
-//
-//    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken) {
+        if(refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
+        }
+
+        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
+        String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
+        String newAccessToken = jwtUtil.createNewAccessToken(username,role);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
+    }
+
 //    @PostMapping("/logout")
 //    public ResponseEntity<MessageDto> logout(HttpServletResponse httpServletResponse) {
 //        try{
