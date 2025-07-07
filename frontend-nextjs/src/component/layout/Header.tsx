@@ -3,13 +3,23 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import {springFetcher} from "@/lib/api";
 
 const Header = () => {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
 
     const handleLogout = () => {
-        router.push('/'); // 로그아웃 후 메인 페이지로 이동
+            springFetcher('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(()=>{
+                localStorage.removeItem('accessToken');
+                alert("로그아웃되었습니다")
+                router.push("/");
+            }).catch(err => {
+                console.log(err)
+            })
     };
 
     return (
