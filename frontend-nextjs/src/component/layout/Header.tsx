@@ -5,11 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 const Header = () => {
-    const { isLoggedIn, user, logout, isLoading } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
 
     const handleLogout = () => {
-        logout();
         router.push('/'); // 로그아웃 후 메인 페이지로 이동
     };
 
@@ -29,9 +28,9 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                     {isLoading ? (
                         <div className="h-8 w-24 bg-border rounded-md animate-pulse"></div>
-                    ) : isLoggedIn ? (
+                    ) : isAuthenticated ? (
                         <>
-                            <span className="text-text-secondary">환영합니다, {user?.name}님!</span>
+                            {/*<span className="text-text-secondary">환영합니다, {user?.name}님!</span>*/}
                             <Link href="/mypage" className="text-text-main hover:text-primary transition-colors">마이페이지</Link>
                             <button onClick={handleLogout} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
                                 로그아웃

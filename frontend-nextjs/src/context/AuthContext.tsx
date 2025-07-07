@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
     // user: User | null,
     accessToken: string | null,
-    setAccessToken: (token: string) => void,
+    setAccessToken: (accessToken: string) => void,
     isAuthenticated: boolean,
     isLoading: boolean
 }
@@ -33,10 +33,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
     }, []);
 
-    const setAccessToken = (token: string) => {
-        setAccessTokenstate(token);
-        if(token) {
-            localStorage.setItem('accessToken', token);
+    const setAccessToken = (accessToken: string) => {
+        setAccessTokenstate(accessToken);
+        if(accessToken) {
+            localStorage.setItem('accessToken', accessToken);
         }else{
             localStorage.removeItem('accessToken');
         }
@@ -44,19 +44,19 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const isAuthenticated = !!accessToken;
 
-    const logout = () => {
-        // document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        springFetcher('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include'
-        }).then(()=>{
-            alert("로그아웃되었습니다")
-            router.push("/");
-        }).catch(err => {
-            console.log(err)
-        })
-        setUser(null);
-    };
+    // const logout = () => {
+    //     // document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    //     springFetcher('/api/auth/logout', {
+    //         method: 'POST',
+    //         credentials: 'include'
+    //     }).then(()=>{
+    //         alert("로그아웃되었습니다")
+    //         router.push("/");
+    //     }).catch(err => {
+    //         console.log(err)
+    //     })
+    //     setUser(null);
+    // };
 
     return (
         <AuthContext.Provider value={{ accessToken, setAccessToken, isAuthenticated, isLoading}}>
