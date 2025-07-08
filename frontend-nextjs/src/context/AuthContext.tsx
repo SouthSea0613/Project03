@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { springFetcher } from "@/lib/api";
+import Cookies from "js-cookie";
 
 interface User {
     username: string,
@@ -25,7 +26,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
+        const token = Cookies.get('accessToken');
         if(token) {
             setAccessTokenstate(token);
             springFetcher('/api/auth/user/me',{
@@ -42,17 +43,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const setAccessToken = (accessToken: string) => {
+        console.log("auth" + accessToken)
         setAccessTokenstate(accessToken);
-        if(accessToken) {
-            localStorage.setItem('accessToken', accessToken);
-        }else{
-            localStorage.removeItem('accessToken');
-        }
     }
 
     const isAuthenticated = () =>{
-        return !!localStorage.getItem('accessToken');
+        return !!user;
     }
+
     return (
         <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading}}>
             {children}

@@ -44,53 +44,53 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         try {
             Map<String,String> tokens = authService.login(loginDto);
             String accessToken = tokens.get("accessToken");
             String refreshToken = tokens.get("refreshToken");
-            httpServletResponse.setHeader("Authorization", "Bearer"+accessToken);
+            httpServletResponse.setHeader("Authorization", "Bearer" + accessToken);
+
+            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken)
+                    .maxAge(3600)
+                    .path("/")
+                    .secure(true)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .build();
+            ResponseCookie accesscookie = ResponseCookie.from("accessToken", accessToken)
+                    .maxAge(3600)
+                    .path("/")
+                    .secure(true)
+                    .sameSite("None")
+                    .build();
+
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("refreshToken", refreshToken)
-                            .maxAge(3600)
-                            .path("/")
-                            .secure(true)
-                            .httpOnly(true)
-                            .sameSite("None")
-                            .build()
-                            .toString()
-                    )
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("accessToken",accessToken)
-                            .maxAge(3600)
-                            .path("/")
-                            .secure(true)
-                            .sameSite("None")
-                            .build()
-                            .toString()
-                    )
-                    .body(new MessageDto(true, "로그인 성공"));
+                    .body(new ApiResponseDto(true, "로그인 성공", accessToken));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
+            log.info("테스트");
+            log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
         }
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse httpServletResponse) {
-        if(refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
+        if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        if(jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(jwtUtil.getJwtFromHeader(httpServletResponse))){
+        if (jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(jwtUtil.getJwtFromHeader(httpServletResponse))) {
             String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
             String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
-            String newAccessToken = jwtUtil.createNewAccessToken(username,role);
+            String newAccessToken = jwtUtil.createNewAccessToken(username, role);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
+                    .body(new ApiResponseDto(true, "accessToken 재발급", newAccessToken));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "accessToken 재발급 실패"));
     }
@@ -115,7 +115,7 @@ public class AuthController {
                             .toString()
                     )
                     .body(new MessageDto(true, "로그아웃 성공"));
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패"));
         }
     }
@@ -124,11 +124,11 @@ public class AuthController {
     public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         User user = userDetails.getUser();
         UserInfoDto userInfoDto = new UserInfoDto(user.getUsername(), user.getUsername(), user.getEmail());
-        return ResponseEntity.ok(new ApiResponseDto(true,"유효한 토큰 & user 정보 조회",userInfoDto));
+        return ResponseEntity.ok(new ApiResponseDto(true, "유효한 토큰 & user 정보 조회", userInfoDto));
     }
 
     @PostMapping("/checkUsername")
-    public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<MessageDto> checkUsername(@RequestBody SignUpDto signUpDto) {
         if(signUpDto.getUsername() == null){
             MessageDto responseDto = new MessageDto();
             return ResponseEntity.badRequest().body(responseDto);
@@ -136,26 +136,26 @@ public class AuthController {
         try{
             boolean isAvailable = authService.checkUsername(signUpDto.getUsername());
             String message = isAvailable?"사용 가능한 아이디입니다.":"이미 사용중인 아이디입니다.";
-            MessageDto responseDto = new MessageDto(isAvailable,message);
+            MessageDto responseDto = new MessageDto(isAvailable, message);
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            MessageDto responseDto = new MessageDto(false,"아이디 중복 확인 중 오류 발생");
+            MessageDto responseDto = new MessageDto(false, "아이디 중복 확인 중 오류 발생");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
 
     @PostMapping("/checkEmail")
     public ResponseEntity<MessageDto> checkEmail(@RequestBody SignUpDto signUpDto) {
-        if(signUpDto.getEmail() == null){
-            return ResponseEntity.badRequest().body(new MessageDto(false,"잘못된 요청"));
+        if (signUpDto.getEmail() == null) {
+            return ResponseEntity.badRequest().body(new MessageDto(false, "잘못된 요청"));
         }
-        try{
+        try {
             boolean isAvailable = authService.checkEmail(signUpDto.getEmail());
             String message = isAvailable?"사용 가능한 이메일입니다.":"이미 사용중인 이메일입니다.";
             return ResponseEntity.ok(new MessageDto(isAvailable,message));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false,"아이디 중복 확인 중 오류 발생"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false, "아이디 중복 확인 중 오류 발생"));
         }
     }
 }

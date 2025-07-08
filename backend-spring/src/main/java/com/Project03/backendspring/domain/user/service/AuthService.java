@@ -52,6 +52,7 @@ public class AuthService {
             return false;
         }
     }
+
     @Transactional
     public Map<String, String> login(LoginDto loginDto) {
         User user = userRepository
@@ -62,16 +63,16 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-            String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
-            String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
-            user.setRefreshToken(refreshToken);
-            userRepository.save(user);
+        String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
 
-            Map<String,String> tokens = new HashMap<>();
-            tokens.put("accessToken",accessToken);
-            tokens.put("refreshToken",refreshToken);
+        Map<String,String> tokens = new HashMap<>();
+        tokens.put("accessToken",accessToken);
+        tokens.put("refreshToken",refreshToken);
 
-            return tokens;
+        return tokens;
     }
 
     public boolean checkUsername(String username) {
