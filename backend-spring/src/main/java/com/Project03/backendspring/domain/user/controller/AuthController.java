@@ -72,27 +72,40 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> refresh(@RequestBody String accessToken,@CookieValue("refreshToken") String refreshToken) {
         if(refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
-        String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
-        String newAccessToken = jwtUtil.createNewAccessToken(username,role);
+        if(jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(accessToken)){
+            String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
+            String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
+            String newAccessToken = jwtUtil.createNewAccessToken(username,role);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "accessToken 재발급 실패"));
+
     }
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<MessageDto> logout(HttpServletResponse httpServletResponse) {
-//        try{
-//            if(jwtUtil.getTokenFromCookie()!=null){
-//
-//            }
-//        }
-//    }
+    @PostMapping("/logout")
+    public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
+        try{
+//            로그아웃시 db에 저장된 refreshtoken 삭제
+            authService.logout(loginDto.getUsername());
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
+                    .maxAge(0)
+                    .path("/")
+                    .httpOnly(true)
+                    .build();
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(new MessageDto(true, "로그아웃 성공"));
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패"));
+        }
+    }
 
     @GetMapping("/user/me")
     public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){

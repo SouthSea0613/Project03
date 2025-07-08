@@ -90,11 +90,9 @@ public class AuthService {
         return true;
     }
 
-//    public boolean saveToken(String username, String refreshToken) {
-//        log.info(String.valueOf(userRepository.updateRefreshToken(username,refreshToken)));
-//        if(userRepository.updateRefreshToken(username,refreshToken)==0){
-//            return false;
-//        }
-//        return true;
-//    }
+    @Transactional
+    public void logout(String username) {
+        // DB에 저장된 사용자의 Refresh Token을 null로 업데이트
+        userRepository.updateRefreshToken(username);
+    }
 }

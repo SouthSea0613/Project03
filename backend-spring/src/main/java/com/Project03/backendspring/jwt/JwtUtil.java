@@ -89,7 +89,8 @@ public class JwtUtil {
                 }
             }
         }
-        return null;}
+        return null;
+    }
 
     public String createNewAccessToken(String username, String role) {
         return createToken(username,role,ACCESS_TOKEN_TIME);
