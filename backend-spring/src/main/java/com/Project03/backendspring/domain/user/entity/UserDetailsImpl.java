@@ -1,6 +1,5 @@
-package com.Project03.backendspring.domain.user.service;
+package com.Project03.backendspring.domain.user.entity;
 
-import com.Project03.backendspring.domain.user.entity.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,6 +1,7 @@
 package com.Project03.backendspring.domain.user.service;
 
 import com.Project03.backendspring.domain.user.entity.User;
+import com.Project03.backendspring.domain.user.entity.UserDetailsImpl;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

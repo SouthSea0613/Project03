@@ -1,6 +1,5 @@
 package com.Project03.backendspring.domain.user.controller;
 
-
 import com.Project03.backendspring.common.dto.response.ApiResponseDto;
 import com.Project03.backendspring.common.dto.response.MessageDto;
 import com.Project03.backendspring.domain.user.dto.request.LoginDto;
@@ -8,9 +7,8 @@ import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 import com.Project03.backendspring.domain.user.dto.response.UserInfoDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
-import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
+import com.Project03.backendspring.domain.user.entity.UserDetailsImpl;
 import com.Project03.backendspring.jwt.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +32,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
         try {
-            log.info("signup");
-            if(authService.signup(signUpDto)) {
+            if (authService.signup(signUpDto)) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "회원가입 성공"));
             }
             else {
@@ -65,8 +62,6 @@ public class AuthController {
                     .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
                     .body(new ApiResponseDto(true, "로그인 성공",Map.of("accessToken",accessToken)));
         } catch (IllegalArgumentException e) {
-            log.info("테스트");
-            log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
         }
     }
@@ -92,13 +87,13 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         try{
-//            로그아웃시 db에 저장된 refreshtoken 삭제
             authService.logout(loginDto.getUsername());
             ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
                     .maxAge(0)
                     .path("/")
                     .httpOnly(true)
                     .build();
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(new MessageDto(true, "로그아웃 성공"));
