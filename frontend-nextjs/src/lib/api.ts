@@ -48,7 +48,7 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
             try {
                 // Refresh Token으로 새로운 Access Token 요청
                 // (이 요청은 authFetcher를 사용하면 무한 루프에 빠질 수 있으므로, 기본 fetcher 사용)
-                const refreshResponse = await springFetcher('/api/token/reissue', {
+                const refreshResponse = await springFetcher('/api/auth/refresh', {
                     method: 'POST',
                     credentials: 'include', // HttpOnly 쿠키 전송을 위해 필수
                 });
@@ -60,7 +60,6 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
                 // 새로운 토큰으로 원래 요청 헤더를 교체
                 headers.set('Authorization', `Bearer ${newAccessToken}`);
                 options.headers = headers;
-
                 // 4. 원래 요청 재시도
                 console.log('Retrying the original request...');
                 return await fetcher(path, options);

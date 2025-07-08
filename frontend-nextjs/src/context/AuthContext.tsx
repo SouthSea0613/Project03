@@ -54,7 +54,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const isAuthenticated = () =>{
         return !!localStorage.getItem('accessToken');
     }
-
     return (
         <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading}}>
             {children}

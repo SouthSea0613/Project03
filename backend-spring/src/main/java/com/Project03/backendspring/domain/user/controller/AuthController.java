@@ -47,37 +47,45 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         try {
             Map<String,String> tokens = authService.login(loginDto);
             String accessToken = tokens.get("accessToken");
             String refreshToken = tokens.get("refreshToken");
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+            httpServletResponse.setHeader("Authorization", "Bearer"+accessToken);
+            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken)
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
+            ResponseCookie accesscookie = ResponseCookie.from("accessToken",accessToken)
+                    .maxAge(3600)
+                    .path("/")
+                    .secure(true)
+                    .sameSite("None")
+                    .build();
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString()) // 헤더에 직접 쿠키 설정
-                    .body(new ApiResponseDto(true, "로그인 성공",Map.of("accessToken",accessToken)));
+                    .header(HttpHeaders.SET_COOKIE, refreshcookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, accesscookie.toString())// 헤더에 직접 쿠키 설정
+                    .body(new MessageDto(true, "로그인 성공"));
         } catch (IllegalArgumentException e) {
             log.info("테스트");
             log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody String accessToken,@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse httpServletResponse) {
         if(refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        if(jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(accessToken)){
+        if(jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(jwtUtil.getJwtFromHeader(httpServletResponse))){
             String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
             String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
             String newAccessToken = jwtUtil.createNewAccessToken(username,role);
@@ -93,14 +101,20 @@ public class AuthController {
     public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         try{
 //            로그아웃시 db에 저장된 refreshtoken 삭제
+
             authService.logout(loginDto.getUsername());
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
+            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", null)
                     .maxAge(0)
                     .path("/")
                     .httpOnly(true)
                     .build();
+            ResponseCookie accesscookie = ResponseCookie.from("accessToken", null)
+                    .maxAge(0)
+                    .path("/")
+                    .build();
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, refreshcookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, accesscookie.toString())
                     .body(new MessageDto(true, "로그아웃 성공"));
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패"));

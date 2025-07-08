@@ -61,7 +61,7 @@ public class AuthService {
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        if (!userRepository.existsByRefreshToken(loginDto.getUsername())) {
+
             String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
             String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
             user.setRefreshToken(refreshToken);
@@ -72,22 +72,14 @@ public class AuthService {
             tokens.put("refreshToken",refreshToken);
 
             return tokens;
-        }
-        return null;
     }
 
     public boolean checkUsername(String username) {
-        if (userRepository.existsByUsername(username)) {
-            return false;
-        }
-        return true;
+        return !userRepository.existsByUsername(username);
     }
 
     public boolean checkEmail(String email) {
-        if(userRepository.existsByEmail(email)) {
-            return false;
-        }
-        return true;
+        return !userRepository.existsByEmail(email);
     }
 
     @Transactional
