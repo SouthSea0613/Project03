@@ -1,22 +1,31 @@
 'use client';
-import React from 'react';
+import React, {useState} from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import {springFetcher} from "@/lib/api";
 
 const Header = () => {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { user,isAuthenticated, isLoading, setAccessToken } = useAuth();
+    const [userinfo,setUser] = useState(null)
+
     const router = useRouter();
 
-    const handleLogout = () => {
-            springFetcher('/api/auth/logout', {
+    const handleLogout = async () => {
+            await springFetcher('/api/auth/logout', {
                 method: 'POST',
-                credentials: 'include'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    username:user?.username,
+                }),
             }).then(()=>{
                 localStorage.removeItem('accessToken');
                 alert("로그아웃되었습니다")
                 router.push("/");
+                setAccessToken("");
             }).catch(err => {
                 console.log(err)
             })
@@ -38,9 +47,9 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                     {isLoading ? (
                         <div className="h-8 w-24 bg-border rounded-md animate-pulse"></div>
-                    ) : isAuthenticated ? (
+                    ) : isAuthenticated() ? (
                         <>
-                            {/*<span className="text-text-secondary">환영합니다, {user?.name}님!</span>*/}
+                            <span className="text-text-secondary">{user?.username}님</span>
                             <Link href="/mypage" className="text-text-main hover:text-primary transition-colors">마이페이지</Link>
                             <button onClick={handleLogout} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
                                 로그아웃

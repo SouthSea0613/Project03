@@ -11,10 +11,10 @@ interface User {
 }
 
 interface AuthContextType {
-    // user: User | null,
+    user: User | null,
     accessToken: string | null,
     setAccessToken: (accessToken: string) => void,
-    isAuthenticated: boolean,
+    isAuthenticated: () => boolean,
     isLoading: boolean
 }
 
@@ -29,6 +29,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = localStorage.getItem('accessToken');
         if(token) {
             setAccessTokenstate(token);
+            springFetcher('/api/auth/user/me',{
+                method: 'GET',
+                credentials:'include'
+            }).then(res => {
+                console.log(res);
+                setUser(res.data.data)
+            }).catch(err => {
+                console.log(err);
+            })
         }
         setIsLoading(false);
     }, []);
@@ -42,10 +51,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const isAuthenticated = !!accessToken;
+    const isAuthenticated = () =>{
+        return !!localStorage.getItem('accessToken');
+    }
 
     return (
-        <AuthContext.Provider value={{ accessToken, setAccessToken, isAuthenticated, isLoading}}>
+        <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading}}>
             {children}
         </AuthContext.Provider>
     );
