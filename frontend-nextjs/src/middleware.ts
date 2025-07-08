@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('accessToken')?.value;
     console.log(token)
     const { pathname } = request.nextUrl;
-
+    console.log(pathname)
     const allowedPaths = ['/', '/auth/login', '/auth/signup'];
 
     if (!token) {
