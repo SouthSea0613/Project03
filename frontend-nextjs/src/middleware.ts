@@ -12,7 +12,7 @@ export const config = {
 };
 
 export async function middleware(request: NextRequest) {
-    const token = request.cookies.get('refreshToken')?.value;
+    const token = request.cookies.get('accessToken')?.value;
     console.log(token)
     const { pathname } = request.nextUrl;
 

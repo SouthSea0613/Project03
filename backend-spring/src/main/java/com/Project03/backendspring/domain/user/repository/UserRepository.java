@@ -10,11 +10,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
-    boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
 
-    @Query("SELECT COUNT(u.refreshToken) > 0 FROM User u WHERE u.username = ?1 AND u.refreshToken IS NOT NULL")
-    boolean existsByRefreshToken(String username);
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
 
     @Modifying
     @Query("UPDATE User u SET u.refreshToken = NULL WHERE u.username = ?1")

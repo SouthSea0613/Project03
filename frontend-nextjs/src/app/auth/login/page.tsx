@@ -30,10 +30,11 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    const {accessToken} = res.data.data;
-                    setAccessToken(accessToken);
-                    alert(res.data.message);
-                    router.push("/");
+                    console.log(res.data)
+                    // const {accessToken} = res.data.data;
+                    // setAccessToken(accessToken);
+                    // alert(res.data.message);
+                    // router.push("/");
                 }else{
                     alert(res.data.message);
                     router.push("/auth/login");
