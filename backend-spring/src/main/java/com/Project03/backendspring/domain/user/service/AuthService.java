@@ -77,22 +77,15 @@ public class AuthService {
     }
 
     public boolean checkUsername(String username) {
-        if (userRepository.existsByUsername(username)) {
-            return false;
-        }
-        return true;
+        return !userRepository.existsByUsername(username);
     }
 
     public boolean checkEmail(String email) {
-        if(userRepository.existsByEmail(email)) {
-            return false;
-        }
-        return true;
+        return !userRepository.existsByEmail(email);
     }
 
     @Transactional
     public void logout(String username) {
-        // DB에 저장된 사용자의 Refresh Token을 null로 업데이트
         userRepository.updateRefreshToken(username);
     }
 }

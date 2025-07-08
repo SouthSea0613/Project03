@@ -2,7 +2,6 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { springFetcher } from "@/lib/api";
-import {router} from "next/client";
 
 interface User {
     username: string,

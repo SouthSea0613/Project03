@@ -6,7 +6,6 @@ async function handleResponse(response: Response) {
         throw new Error(`API call failed with status: ${response.status}`);
     }
 
-    // JSON 데이터와 헤더를 모두 포함한 객체를 반환하도록 수정
     const data = await response.json();
     return {
         data: data,
@@ -15,6 +14,7 @@ async function handleResponse(response: Response) {
 }
 
 export const springFetcher = async (path: string, options?: RequestInit) => {
+
     const url = `${SPRING_API_URL}${path}`;
     const response = await fetch(url, options);
     return handleResponse(response);
@@ -39,29 +39,22 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
     const fetcher = apiType === 'spring' ? springFetcher : fastApiFetcher;
 
     try {
-        // 2. 일단 API 요청 시도
         return await fetcher(path, options);
     } catch (error: any) {
-        // 3. 401 에러 발생 시 토큰 재발급 시도
         if (error.status === 401) {
-            console.log('Access Token is expired. Trying to refresh...');
             try {
-                // Refresh Token으로 새로운 Access Token 요청
-                // (이 요청은 authFetcher를 사용하면 무한 루프에 빠질 수 있으므로, 기본 fetcher 사용)
-                const refreshResponse = await springFetcher('/api/token/reissue', {
+                const refreshResponse = await springFetcher('/api/auth/refresh', {
                     method: 'POST',
-                    credentials: 'include', // HttpOnly 쿠키 전송을 위해 필수
+                    credentials: 'include',
                 });
 
                 const newAccessToken = refreshResponse.data.accessToken;
                 localStorage.setItem('accessToken', newAccessToken);
                 console.log('Access Token refreshed successfully.');
 
-                // 새로운 토큰으로 원래 요청 헤더를 교체
                 headers.set('Authorization', `Bearer ${newAccessToken}`);
                 options.headers = headers;
 
-                // 4. 원래 요청 재시도
                 console.log('Retrying the original request...');
                 return await fetcher(path, options);
 

@@ -67,7 +67,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody String accessToken,@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> refresh(@RequestBody String accessToken, @CookieValue("refreshToken") String refreshToken) {
         if(refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
@@ -81,7 +81,6 @@ public class AuthController {
                     .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "accessToken 재발급 실패"));
-
     }
 
     @PostMapping("/logout")
