@@ -4,6 +4,7 @@ import {springFetcher} from "@/lib/api";
 import {useRouter} from "next/navigation";
 import { usePathname } from 'next/navigation';
 import {useAuth} from "@/context/AuthContext";
+import {cookies} from "next/headers";
 
 export default function LoginPage() {
     const { setAccessToken } = useAuth();
@@ -15,7 +16,6 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        console.log("클릭했따")
 
         springFetcher('/api/auth/login', {
             method: 'POST',
@@ -30,11 +30,10 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    console.log(res.data)
-                    // const {accessToken} = res.data.data;
-                    // setAccessToken(accessToken);
-                    // alert(res.data.message);
-                    // router.push("/");
+                    console.log( res.data.data)
+                    setAccessToken(res.data.data);
+                    alert(res.data.message);
+                    router.push("/");
                 }else{
                     alert(res.data.message);
                     router.push("/auth/login");

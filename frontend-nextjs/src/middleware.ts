@@ -13,9 +13,8 @@ export const config = {
 
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get('accessToken')?.value;
-    console.log(token)
     const { pathname } = request.nextUrl;
-
+    console.log(request);
     const allowedPaths = ['/', '/auth/login', '/auth/signup'];
 
     if (!token) {
@@ -32,7 +31,9 @@ export async function middleware(request: NextRequest) {
 
         const secret = new TextEncoder().encode(JWT_SECRET_KEY);
         await jwtVerify(token, secret);
+        console.log('ddd : ' + pathname);
         if (pathname === '/auth/login' || pathname === '/auth/signup') {
+
             return NextResponse.redirect(new URL('/', request.url));
         }
 

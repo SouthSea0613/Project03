@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         try {
             Map<String,String> tokens = authService.login(loginDto);
             String accessToken = tokens.get("accessToken");
@@ -66,16 +66,15 @@ public class AuthController {
                     .secure(true)
                     .sameSite("None")
                     .build();
-
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, refreshcookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, accesscookie.toString())// 헤더에 직접 쿠키 설정
-                    .body(new MessageDto(true, "로그인 성공"));
+                    .body(new ApiResponseDto(true, "로그인 성공", accessToken));
         } catch (IllegalArgumentException e) {
             log.info("테스트");
             log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그인 실패"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
         }
     }
 
@@ -98,7 +97,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto) {
         try{
 //            로그아웃시 db에 저장된 refreshtoken 삭제
 
