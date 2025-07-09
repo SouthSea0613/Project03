@@ -71,7 +71,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse httpServletResponse) {
-        if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
+        if (refreshToken == null || !authService.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 

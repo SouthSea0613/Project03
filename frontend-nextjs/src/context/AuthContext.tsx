@@ -5,9 +5,9 @@ import { authFetcher, springFetcher } from "@/lib/api";
 import Cookies from "js-cookie";
 
 interface User {
-    username: string,
-    email: string,
-    name: string
+    username : string,
+    email : string,
+    name : string
 }
 
 interface AuthContextType {
@@ -15,7 +15,9 @@ interface AuthContextType {
     accessToken: string | null,
     setAccessToken: (accessToken: string) => void,
     isAuthenticated: () => boolean,
-    isLoading: boolean
+    isLoading: boolean,
+    checkAuth : () => void,
+    logout: () => void,
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,20 +27,24 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [accessToken, setAccessTokenstate] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const checkAuth = () =>{
+        authFetcher('/api/auth/user/me',{
+                method: 'GET',
+                credentials:'include'
+            },'spring',
+        ).then(res => {
+            console.log(res);
+            setUser(res.data.data);
+        }).catch(err => {
+            console.log(err);
+        })
+    }
+
     useEffect(() => {
         const token = Cookies.get('accessToken');
         if(token) {
             setAccessTokenstate(token);
-            authFetcher('/api/auth/user/me',{
-                method: 'GET',
-                credentials:'include'
-            },'spring',
-                ).then(res => {
-                console.log(res);
-                setUser(res.data.data)
-            }).catch(err => {
-                console.log(err);
-            })
+            checkAuth();
         }
         setIsLoading(false);
     }, []);
@@ -52,8 +58,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return !!user;
     }
 
+    const logout = () =>{
+        setUser(null);
+    }
+
     return (
-        <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading}}>
+        <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading, checkAuth, logout }}>
             {children}
         </AuthContext.Provider>
     );

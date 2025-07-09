@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from "react";
-import { springFetcher } from "@/lib/api";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import {useAuth} from "@/context/AuthContext";
+import {springFetcher} from "@/lib/api";
 import Link from "next/link";
 
 export default function LoginPage() {
-    const { setAccessToken } = useAuth();
+    const { checkAuth, setAccessToken } = useAuth();
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('');
@@ -32,6 +32,7 @@ export default function LoginPage() {
                 if(res.data.success){
                     console.log( res.data.data)
                     setAccessToken(res.data.data);
+                    checkAuth();
                     alert(res.data.message);
                     router.push("/");
                 }else{
