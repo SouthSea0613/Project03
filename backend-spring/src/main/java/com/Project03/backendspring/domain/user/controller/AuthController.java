@@ -46,7 +46,7 @@ public class AuthController {
     public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
             JwtDto jwtDto = authService.login(loginDto);
             httpServletResponse.setHeader("Authorization", "Bearer"+jwtDto.getAccessToken());
-            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
@@ -54,15 +54,15 @@ public class AuthController {
                     .sameSite("None")
                     .build();
 
-            ResponseCookie accesscookie = ResponseCookie.from("accessToken",jwtDto.getAccessToken())
+            ResponseCookie accessCookie = ResponseCookie.from("accessToken",jwtDto.getAccessToken())
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
                     .sameSite("None")
                     .build();
 
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -128,7 +128,7 @@ public class AuthController {
     }
 
     @PostMapping("/checkUsername")
-    public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<MessageDto> checkUsername(@RequestBody SignUpDto signUpDto) {
         if (signUpDto.getUsername() == null) {
             MessageDto responseDto = new MessageDto();
             return ResponseEntity.badRequest().body(responseDto);

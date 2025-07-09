@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -6,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { springFetcher } from "@/lib/api";
 
 const Header = () => {
-    const { user,isAuthenticated, isLoading, setAccessToken } = useAuth();
+    const { user, isAuthenticated, isLoading, setAccessToken } = useAuth();
 
     const router = useRouter();
 

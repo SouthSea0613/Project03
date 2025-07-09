@@ -50,6 +50,7 @@ export default function Signup() {
                 alert('회원가입 중 오류가 발생했습니다.');
             })
     }
+
     const checkUsername = () => {
         springFetcher('/api/auth/checkUsername', {
             method: 'POST',
@@ -66,6 +67,7 @@ export default function Signup() {
             setIderror("아이디 중복 확인 중 오류가 발생했습니다.");
         })
     }
+
     const checkEmail = () => {
         springFetcher('/api/auth/checkEmail', {
             method: 'POST',
@@ -83,6 +85,7 @@ export default function Signup() {
                 setEmailerror("이메일 중복 확인 중 오류가 발생했습니다.");
             })
     }
+
     return (
         <section className="flex-grow container mx-auto px-4 py-16 flex items-center justify-center">
             <div className="max-w-md w-full mx-auto bg-gray-800 p-8 rounded-lg border border-border">
