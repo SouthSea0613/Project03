@@ -94,4 +94,8 @@ public class AuthService {
     public String createNewAccessToken(String username, String role) {
         return  jwtUtil.createAccessToken(username, role);
     }
+
+    public boolean validateToken(String refreshToken) {
+        return jwtUtil.validateToken(refreshToken);
+    }
 }
