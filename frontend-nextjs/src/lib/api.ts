@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 const SPRING_API_URL = process.env.NEXT_PUBLIC_SPRING_API_URL;
 const FASTAPI_API_URL = process.env.NEXT_PUBLIC_FASTAPI_API_URL;
 
@@ -29,7 +31,7 @@ type ApiType = 'spring' | 'fastapi';
 
 export const authFetcher = async (path: string, options: RequestInit = {}, apiType: ApiType) => {
     // 1. 헤더에 Access Token 추가
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = Cookies.get('accessToken');
     const headers = new Headers(options.headers);
     if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);
@@ -49,7 +51,6 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
                 });
 
                 const newAccessToken = refreshResponse.data.accessToken;
-                localStorage.setItem('accessToken', newAccessToken);
                 console.log('Access Token refreshed successfully.');
 
                 headers.set('Authorization', `Bearer ${newAccessToken}`);
@@ -59,11 +60,7 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
                 return await fetcher(path, options);
 
             } catch (refreshError) {
-                // Refresh Token도 만료된 경우
                 console.error("Refresh token is invalid. Logging out.");
-                localStorage.removeItem('accessToken');
-                // 필요하다면 로그인 페이지로 리디렉션
-                // window.location.href = '/login';
                 throw refreshError; // 최종적으로는 실패 처리
             }
         }

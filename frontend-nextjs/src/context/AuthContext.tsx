@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { springFetcher } from "@/lib/api";
+import { authFetcher, springFetcher } from "@/lib/api";
 import Cookies from "js-cookie";
 
 interface User {
@@ -29,10 +29,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = Cookies.get('accessToken');
         if(token) {
             setAccessTokenstate(token);
-            springFetcher('/api/auth/user/me',{
+            authFetcher('/api/auth/user/me',{
                 method: 'GET',
                 credentials:'include'
-            }).then(res => {
+            },'spring',
+                ).then(res => {
                 console.log(res);
                 setUser(res.data.data)
             }).catch(err => {

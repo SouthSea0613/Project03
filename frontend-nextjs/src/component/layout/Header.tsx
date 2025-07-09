@@ -7,7 +7,6 @@ import { springFetcher } from "@/lib/api";
 
 const Header = () => {
     const { user,isAuthenticated, isLoading, setAccessToken } = useAuth();
-    const [userinfo, setUser] = useState(null)
 
     const router = useRouter();
 
@@ -22,7 +21,6 @@ const Header = () => {
                     username:user?.username,
                 }),
             }).then(()=>{
-                localStorage.removeItem('accessToken');
                 alert("로그아웃되었습니다")
                 router.push("/");
                 setAccessToken("");
