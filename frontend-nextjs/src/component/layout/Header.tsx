@@ -1,12 +1,12 @@
 'use client';
-import React, {useState} from 'react';
+
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import {springFetcher} from "@/lib/api";
 
 const Header = () => {
-    const { user,isAuthenticated, isLoading, setAccessToken } = useAuth();
+    const { user,isAuthenticated, isLoading, setAccessToken, logout } = useAuth();
 
     const router = useRouter();
 
@@ -24,6 +24,7 @@ const Header = () => {
                 alert("로그아웃되었습니다")
                 router.push("/");
                 setAccessToken("");
+                logout();
             }).catch(err => {
                 console.log(err)
             })
@@ -45,7 +46,7 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                     {isLoading ? (
                         <div className="h-8 w-24 bg-border rounded-md animate-pulse"></div>
-                    ) : isAuthenticated() ? (
+                    ) : !!user ? (
                         <>
                             <span className="text-text-secondary">{user?.username}님</span>
                             <Link href="/mypage" className="text-text-main hover:text-primary transition-colors">마이페이지</Link>
