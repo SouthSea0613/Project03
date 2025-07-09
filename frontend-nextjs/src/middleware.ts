@@ -6,8 +6,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET;
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|auth/|signup).*)',
-        '/',
+        '/((?!api|_next/static|_next/image|favicon.ico).*)',
     ],
 };
 
@@ -30,7 +29,6 @@ export async function middleware(request: NextRequest) {
 
         const secret = new TextEncoder().encode(JWT_SECRET_KEY);
         await jwtVerify(token, secret);
-        console.log('ddd : ' + pathname);
         if (pathname === '/auth/login' || pathname === '/auth/signup') {
 
             return NextResponse.redirect(new URL('/', request.url));
