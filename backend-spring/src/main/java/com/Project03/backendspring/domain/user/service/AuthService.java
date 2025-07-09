@@ -5,15 +5,15 @@ import com.Project03.backendspring.domain.user.dto.request.SignUpDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.entity.UserRole;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
+import com.Project03.backendspring.jwt.JwtDto;
 import com.Project03.backendspring.jwt.JwtUtil;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -53,25 +53,21 @@ public class AuthService {
         }
     }
     @Transactional
-    public Map<String, String> login(LoginDto loginDto) {
+    public JwtDto login(LoginDto loginDto) {
         User user = userRepository
                 .findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
+        }else{
             String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
             String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
             user.setRefreshToken(refreshToken);
             userRepository.save(user);
 
-            Map<String,String> tokens = new HashMap<>();
-            tokens.put("accessToken",accessToken);
-            tokens.put("refreshToken",refreshToken);
-
-            return tokens;
+            return new JwtDto(refreshToken,accessToken);
+        }
     }
 
     public boolean checkUsername(String username) {
@@ -84,7 +80,18 @@ public class AuthService {
 
     @Transactional
     public void logout(String username) {
-        // DB에 저장된 사용자의 Refresh Token을 null로 업데이트
         userRepository.updateRefreshToken(username);
+    }
+
+    public Claims getUserInfoFromToken(String token) {
+        return jwtUtil.getUserInfoFromToken(token);
+    }
+
+    public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
+        return jwtUtil.getJwtFromHeader(httpServletResponse);
+    }
+
+    public String createNewAccessToken(String username, String role) {
+        return  jwtUtil.createAccessToken(username, role);
     }
 }

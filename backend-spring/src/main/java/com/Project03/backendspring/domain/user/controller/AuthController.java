@@ -9,6 +9,7 @@ import com.Project03.backendspring.domain.user.dto.response.UserInfoDto;
 import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.service.UserDetailsImpl;
+import com.Project03.backendspring.jwt.JwtDto;
 import com.Project03.backendspring.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,7 +36,7 @@ public class AuthController {
     public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
         try {
             log.info("signup");
-            if(authService.signup(signUpDto)) {
+            if (authService.signup(signUpDto)) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(true, "회원가입 성공"));
             }
             else {
@@ -48,19 +49,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
-        try {
-            Map<String,String> tokens = authService.login(loginDto);
-            String accessToken = tokens.get("accessToken");
-            String refreshToken = tokens.get("refreshToken");
-            httpServletResponse.setHeader("Authorization", "Bearer"+accessToken);
-            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken)
+            JwtDto jwtDto = authService.login(loginDto);
+            httpServletResponse.setHeader("Authorization", "Bearer"+jwtDto.getAccessToken());
+            ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
                     .httpOnly(true)
                     .sameSite("None")
                     .build();
-            ResponseCookie accesscookie = ResponseCookie.from("accessToken",accessToken)
+            ResponseCookie accesscookie = ResponseCookie.from("accessToken",jwtDto.getAccessToken())
                     .maxAge(3600)
                     .path("/")
                     .secure(true)
@@ -70,12 +68,7 @@ public class AuthController {
             httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(new ApiResponseDto(true, "로그인 성공", accessToken));
-        } catch (IllegalArgumentException e) {
-            log.info("테스트");
-            log.error("### 로그인 실패! [Controller Catch] - 원인: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDto(false, "로그인 실패",null));
-        }
+                    .body(new ApiResponseDto(true, "로그인 성공", jwtDto.getAccessToken()));
     }
 
     @PostMapping("/refresh")
@@ -84,10 +77,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        if(jwtUtil.getUserInfoFromToken(refreshToken) == jwtUtil.getUserInfoFromToken(jwtUtil.getJwtFromHeader(httpServletResponse))){
-            String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
-            String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
-            String newAccessToken = jwtUtil.createNewAccessToken(username,role);
+        if (authService.getUserInfoFromToken(refreshToken) == authService.getUserInfoFromToken(authService.getJwtFromHeader(httpServletResponse))) {
+            String username = String.valueOf(authService.getUserInfoFromToken(refreshToken).get("username"));
+            String role = String.valueOf(authService.getUserInfoFromToken(refreshToken).get("role"));
+            String newAccessToken = authService.createNewAccessToken(username,role);
+
+            httpServletResponse.setHeader("Authorization", "Bearer"+newAccessToken);
+            ResponseCookie accesscookie = ResponseCookie.from("accessToken",newAccessToken)
+                    .maxAge(3600)
+                    .path("/")
+                    .secure(true)
+                    .sameSite("None")
+                    .build();
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponseDto(true, "accessToken 재발급",newAccessToken));
@@ -99,7 +101,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto) {
         try{
-//            로그아웃시 db에 저장된 refreshtoken 삭제
 
             authService.logout(loginDto.getUsername());
             ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", null)
@@ -115,7 +116,7 @@ public class AuthController {
                     .header(HttpHeaders.SET_COOKIE, refreshcookie.toString())
                     .header(HttpHeaders.SET_COOKIE, accesscookie.toString())
                     .body(new MessageDto(true, "로그아웃 성공"));
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패"));
         }
     }
@@ -129,11 +130,11 @@ public class AuthController {
 
     @PostMapping("/checkUsername")
     public ResponseEntity<MessageDto> checkusername(@RequestBody SignUpDto signUpDto) {
-        if(signUpDto.getUsername() == null){
+        if (signUpDto.getUsername() == null) {
             MessageDto responseDto = new MessageDto();
             return ResponseEntity.badRequest().body(responseDto);
         }
-        try{
+        try {
             boolean isAvailable = authService.checkUsername(signUpDto.getUsername());
             String message = isAvailable?"사용 가능한 아이디입니다.":"이미 사용중인 아이디입니다.";
             MessageDto responseDto = new MessageDto(isAvailable,message);
@@ -147,10 +148,10 @@ public class AuthController {
 
     @PostMapping("/checkEmail")
     public ResponseEntity<MessageDto> checkEmail(@RequestBody SignUpDto signUpDto) {
-        if(signUpDto.getEmail() == null){
+        if (signUpDto.getEmail() == null) {
             return ResponseEntity.badRequest().body(new MessageDto(false,"잘못된 요청"));
         }
-        try{
+        try {
             boolean isAvailable = authService.checkEmail(signUpDto.getEmail());
             String message = isAvailable?"사용 가능한 이메일입니다.":"이미 사용중인 이메일입니다.";
             return ResponseEntity.ok(new MessageDto(isAvailable,message));
