@@ -14,7 +14,7 @@ export const config = {
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get('accessToken')?.value;
     const { pathname } = request.nextUrl;
-    console.log(request);
+    console.log(request.nextUrl);
     const allowedPaths = ['/', '/auth/login', '/auth/signup'];
 
     if (!token) {
