@@ -92,11 +92,18 @@ public class AuthService {
         return jwtUtil.getJwtFromHeader(httpServletResponse);
     }
 
-    public String createNewAccessToken(String username, String role) {
+    public String createNewAccessToken(String refreshToken) {
+        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
+        String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
         return  jwtUtil.createAccessToken(username, role);
     }
 
     public boolean validateToken(String refreshToken) {
         return jwtUtil.validateToken(refreshToken);
+    }
+
+    public String checkRefreshToken(String refreshToken) {
+        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken));
+        return userRepository.findRefreshToken(username);
     }
 }

@@ -1,16 +1,17 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, ComponentType } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import {springFetcher} from "@/lib/api";
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const ComponentWithAuth = (props: P) => {
-        const { isAuthenticated, isLoading } = useAuth();
+        const { user, isAuthenticated, isLoading } = useAuth();
         const router = useRouter();
         useEffect(() => {
             if (!isLoading && !isAuthenticated) {
                 router.replace('/login');
             }
-        }, [isAuthenticated, isLoading, router]);
+        }, [user, isAuthenticated, isLoading, router]);
 
         if (isLoading || !isAuthenticated) {
             return <div>Loading...</div>;

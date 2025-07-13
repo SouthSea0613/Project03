@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -76,9 +78,8 @@ public class AuthController {
         }
 
         if (authService.getUserInfoFromToken(refreshToken) == authService.getUserInfoFromToken(authService.getJwtFromHeader(httpServletResponse))) {
-            String username = String.valueOf(authService.getUserInfoFromToken(refreshToken).get("username"));
-            String role = String.valueOf(authService.getUserInfoFromToken(refreshToken).get("role"));
-            String newAccessToken = authService.createNewAccessToken(username,role);
+
+            String newAccessToken = authService.createNewAccessToken(refreshToken);
 
             httpServletResponse.setHeader("Authorization", "Bearer"+newAccessToken);
             ResponseCookie accesscookie = ResponseCookie.from("accessToken",newAccessToken)
@@ -157,5 +158,28 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false, "아이디 중복 확인 중 오류 발생"));
         }
+    }
+
+    @PostMapping("/checkAuth")
+    public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
+        
+        if (!Objects.equals(authService.checkRefreshToken(refreshToken), refreshToken)) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
+                            .maxAge(0)
+                            .path("/")
+                            .httpOnly(true)
+                            .build()
+                            .toString()
+                    )
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken", null)
+                            .maxAge(0)
+                            .path("/")
+                            .build()
+                            .toString()
+                    )
+                    .body(new MessageDto(true, "이중 접속 로그아웃"));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(false, "로그인 상태 유지"));
     }
 }
