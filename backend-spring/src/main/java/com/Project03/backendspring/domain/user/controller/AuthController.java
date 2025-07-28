@@ -9,7 +9,6 @@ import com.Project03.backendspring.domain.user.entity.User;
 import com.Project03.backendspring.domain.user.service.AuthService;
 import com.Project03.backendspring.domain.user.entity.UserDetailsImpl;
 import com.Project03.backendspring.jwt.JwtDto;
-import com.Project03.backendspring.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,6 @@ import java.util.Objects;
 @Slf4j
 public class AuthController {
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public ResponseEntity<MessageDto> signup(@RequestBody SignUpDto signUpDto) {
@@ -151,6 +149,7 @@ public class AuthController {
         if (signUpDto.getEmail() == null) {
             return ResponseEntity.badRequest().body(new MessageDto(false, "잘못된 요청"));
         }
+
         try {
             boolean isAvailable = authService.checkEmail(signUpDto.getEmail());
             String message = isAvailable?"사용 가능한 이메일입니다.":"이미 사용중인 이메일입니다.";
@@ -162,7 +161,6 @@ public class AuthController {
 
     @PostMapping("/checkAuth")
     public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
-        log.info("확인용 : " + refreshToken);
         if (!Objects.equals(authService.checkRefreshToken(refreshToken), refreshToken)) {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
@@ -180,6 +178,7 @@ public class AuthController {
                     )
                     .body(new MessageDto(true, "이중 접속 로그아웃"));
         }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(false, "로그인 상태 유지"));
     }
 }

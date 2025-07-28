@@ -1,7 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, ComponentType } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import {springFetcher} from "@/lib/api";
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const ComponentWithAuth = (props: P) => {
