@@ -67,7 +67,7 @@ public class AuthService {
             user.setRefreshToken(refreshToken);
             userRepository.save(user);
 
-            return new JwtDto(refreshToken,accessToken);
+            return new JwtDto(refreshToken, accessToken);
         }
     }
 

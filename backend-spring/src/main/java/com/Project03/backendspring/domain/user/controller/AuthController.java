@@ -162,7 +162,7 @@ public class AuthController {
 
     @PostMapping("/checkAuth")
     public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
-        
+        log.info("확인용 : " + refreshToken);
         if (!Objects.equals(authService.checkRefreshToken(refreshToken), refreshToken)) {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)

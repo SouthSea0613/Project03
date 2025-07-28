@@ -11,12 +11,11 @@ async function handleResponse(response: Response) {
     const data = await response.json();
     return {
         data: data,
-        headers: response.headers, // 헤더 정보 추가
+        headers: response.headers,
     };
 }
 
 export const springFetcher = async (path: string, options?: RequestInit) => {
-
     const url = `${SPRING_API_URL}${path}`;
     const response = await fetch(url, options);
     return handleResponse(response);
@@ -30,7 +29,6 @@ export const fastApiFetcher = async (path: string, options?: RequestInit) => {
 type ApiType = 'spring' | 'fastapi';
 
 export const authFetcher = async (path: string, options: RequestInit = {}, apiType: ApiType) => {
-    // 1. 헤더에 Access Token 추가
     const accessToken = Cookies.get('accessToken');
     const headers = new Headers(options.headers);
     if (accessToken) {
@@ -51,20 +49,15 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
                 });
 
                 const newAccessToken = refreshResponse.data.accessToken;
-                console.log('Access Token refreshed successfully.');
 
                 headers.set('Authorization', `Bearer ${newAccessToken}`);
                 options.headers = headers;
 
-                console.log('Retrying the original request...');
                 return await fetcher(path, options);
-
             } catch (refreshError) {
-                console.error("Refresh token is invalid. Logging out.");
-                throw refreshError; // 최종적으로는 실패 처리
+                throw refreshError;
             }
         }
-        // 401 에러가 아닌 다른 에러는 그대로 throw
         throw error;
     }
 };
