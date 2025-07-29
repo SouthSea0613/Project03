@@ -3,9 +3,7 @@ package com.Project03.backendspring.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -45,25 +43,18 @@ public class JwtUtil {
     public String createToken(String username, String role, long tokenTime) {
         Date date = new Date();
 
-        return Jwts.builder()
-                        .setSubject(username)
-                        .claim("role", role)
-                        .setExpiration(new Date(date.getTime() + tokenTime))
-                        .setIssuedAt(date)
-                        .signWith(key, signatureAlgorithm)
-                        .compact();
+        return Jwts
+                .builder()
+                .setSubject(username)
+                .claim("role", role)
+                .setExpiration(new Date(date.getTime() + tokenTime))
+                .setIssuedAt(date)
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
     public String resolveToken(HttpServletRequest httpServletRequest) {
         String bearerToken = httpServletRequest.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
-
-    public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
-        String bearerToken = httpServletResponse.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }
@@ -88,17 +79,5 @@ public class JwtUtil {
 
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-    }
-
-    public String getTokenFromCookie(HttpServletRequest httpServletRequest) {
-        Cookie[] cookies = httpServletRequest.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refreshToken")) { // 쿠키 이름이 "token"인 경우
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
     }
 }

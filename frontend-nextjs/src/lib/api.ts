@@ -26,6 +26,7 @@ export const fastApiFetcher = async (path: string, options?: RequestInit) => {
     const response = await fetch(url, options);
     return handleResponse(response);
 };
+
 type ApiType = 'spring' | 'fastapi';
 
 export const authFetcher = async (path: string, options: RequestInit = {}, apiType: ApiType) => {

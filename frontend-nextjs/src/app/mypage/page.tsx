@@ -11,5 +11,4 @@ function MyPage() {
     );
 }
 
-// MyPage 컴포넌트를 withAuth로 감싸서 export 합니다.
 export default withAuth(MyPage);
