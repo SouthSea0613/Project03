@@ -26,16 +26,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String token =  jwtUtil.getTokenFromCookie(httpServletRequest);
-        log.info(token);
+        String token =  jwtUtil.resolveToken(httpServletRequest);
         if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
             Claims info = jwtUtil.getUserInfoFromToken(token);
-            log.info("토큰 유효성 검사 결과 : {}", info);
             try {
                 setAuthentication(info.getSubject());
             }
             catch (Exception e) {
-                log.error("인증 처리 중 오류 발생", e);
                 httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 httpServletResponse.setContentType("application/json");
                 httpServletResponse.getWriter().write("{\"error\":\"Authentication failed\"}");

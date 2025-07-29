@@ -16,13 +16,13 @@ export default function DashboardPage() {
                 </p>
                 <div className="flex justify-center space-x-4">
                     <Link
-                        href="/projects"
+                        href="#"
                         className="bg-accent text-white font-semibold px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105"
                     >
                         프로젝트 참여하기
                     </Link>
                     <Link
-                        href="/recruit"
+                        href="#"
                         className="bg-gray-700 text-text-main font-semibold px-8 py-3 rounded-lg hover:bg-gray-600 transition-transform transform hover:scale-105"
                     >
                         팀원 모집하기

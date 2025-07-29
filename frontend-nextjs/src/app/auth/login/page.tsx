@@ -30,7 +30,6 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    console.log( res.data.data)
                     setAccessToken(res.data.data);
                     checkAuth();
                     alert(res.data.message);

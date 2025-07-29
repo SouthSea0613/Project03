@@ -38,9 +38,9 @@ const Header = () => {
                 </Link>
 
                 <nav className="hidden md:flex items-center space-x-6 text-text-main">
-                    <Link href="/projects" className="hover:text-primary transition-colors">프로젝트 찾기</Link>
-                    <Link href="/recruit" className="hover:text-primary transition-colors">팀원 모집</Link>
-                    <Link href="/requests" className="hover:text-primary transition-colors">프로젝트 요청</Link>
+                    <Link href="#" className="hover:text-primary transition-colors">프로젝트 찾기</Link>
+                    <Link href="#" className="hover:text-primary transition-colors">팀원 모집</Link>
+                    <Link href="#" className="hover:text-primary transition-colors">프로젝트 요청</Link>
                 </nav>
 
                 <div className="flex items-center space-x-4">

@@ -43,30 +43,31 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
-            JwtDto jwtDto = authService.login(loginDto);
-            httpServletResponse.setHeader("Authorization", "Bearer"+jwtDto.getAccessToken());
-            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
-                    .maxAge(3600)
-                    .path("/")
-                    .secure(true)
-                    .httpOnly(true)
-                    .sameSite("None")
-                    .build();
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+        JwtDto jwtDto = authService.login(loginDto);
 
-            ResponseCookie accessCookie = ResponseCookie.from("accessToken",jwtDto.getAccessToken())
-                    .maxAge(3600)
-                    .path("/")
-                    .secure(true)
-                    .sameSite("None")
-                    .build();
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+                .maxAge(7 * 24 * 60 * 60)
+                .path("/")
+                .secure(true)
+                .httpOnly(true)
+                .sameSite("None")
+                .build()
+                .toString()
+        );
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken",jwtDto.getAccessToken())
+                .maxAge(30 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .build()
+                .toString()
+        );
+        httpServletResponse.setHeader("Authorization", "Bearer" + jwtDto.getAccessToken());
 
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(new ApiResponseDto(true, "로그인 성공", jwtDto.getAccessToken()));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageDto(true, "로그인 성공"));
     }
 
     @PostMapping("/refresh")
@@ -75,23 +76,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        if (authService.getUserInfoFromToken(refreshToken) == authService.getUserInfoFromToken(authService.getJwtFromHeader(httpServletResponse))) {
+        String newAccessToken = authService.createNewAccessToken(refreshToken);
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
+                .from("accessToken", newAccessToken)
+                .maxAge(30 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .build()
+                .toString()
+        );
 
-            String newAccessToken = authService.createNewAccessToken(refreshToken);
-
-            httpServletResponse.setHeader("Authorization", "Bearer"+newAccessToken);
-            ResponseCookie accesscookie = ResponseCookie.from("accessToken",newAccessToken)
-                    .maxAge(3600)
-                    .path("/")
-                    .secure(true)
-                    .sameSite("None")
-                    .build();
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, accesscookie.toString());
-
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponseDto(true, "accessToken 재발급", newAccessToken));
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "accessToken 재발급 실패"));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageDto(true, "AccessToken 재발급 겅공"));
     }
 
     @PostMapping("/logout")

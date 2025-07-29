@@ -22,6 +22,7 @@ public class JwtUtil {
     public static final String BEARER_PREFIX = "Bearer";
     private final long ACCESS_TOKEN_TIME = 30 * 60 * 1000L;
     private final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
+
     @Value("${jwt.secret.key}")
     private String secretKey;
     private Key key;
@@ -32,6 +33,7 @@ public class JwtUtil {
         byte[] bytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(bytes);
     }
+
     public String createAccessToken(String username, String role) {
         return createToken(username, role, ACCESS_TOKEN_TIME);
     }
@@ -50,6 +52,14 @@ public class JwtUtil {
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();
+    }
+
+    public String resolveToken(HttpServletRequest httpServletRequest) {
+        String bearerToken = httpServletRequest.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
     public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
@@ -81,7 +91,6 @@ public class JwtUtil {
     }
 
     public String getTokenFromCookie(HttpServletRequest httpServletRequest) {
-
         Cookie[] cookies = httpServletRequest.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -91,9 +100,5 @@ public class JwtUtil {
             }
         }
         return null;
-    }
-
-    public String createNewAccessToken(String username, String role) {
-        return createToken(username,role,ACCESS_TOKEN_TIME);
     }
 }
