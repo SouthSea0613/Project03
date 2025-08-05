@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation';
 import { springFetcher } from "@/lib/api";
 
 const Header = () => {
-    const { user, isLoading, setAccessToken, logout } = useAuth();
-
+    const { user, isLoading, logout } = useAuth();
     const router = useRouter();
 
     const handleLogout = async () => {
+        try {
             await springFetcher('/api/auth/logout', {
                 method: 'POST',
                 headers: {
@@ -18,16 +18,17 @@ const Header = () => {
                 },
                 credentials: 'include',
                 body: JSON.stringify({
-                    username:user?.username,
+                    username: user?.username,
                 }),
-            }).then(()=>{
-                alert("로그아웃되었습니다")
-                router.push("/");
-                setAccessToken("");
-                logout();
-            }).catch(err => {
-                console.log(err)
-            })
+            });
+        }
+        catch (error) {
+            console.error(error);
+        }
+        finally {
+            alert("logged out");
+            logout();
+        }
     };
 
     return (
@@ -50,18 +51,12 @@ const Header = () => {
                         <>
                             <span className="text-text-secondary">{user?.username}님</span>
                             <Link href="/mypage" className="text-text-main hover:text-primary transition-colors">마이페이지</Link>
-                            <button onClick={handleLogout} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
-                                로그아웃
-                            </button>
+                            <button onClick={handleLogout} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">로그아웃</button>
                         </>
                     ) : (
                         <>
-                            <Link href="/auth/login" className="text-text-main hover:text-primary transition-colors">
-                                로그인
-                            </Link>
-                            <Link href="/auth/signup" className="bg-accent text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">
-                                회원가입
-                            </Link>
+                            <Link href="/auth/login" className="text-text-main hover:text-primary transition-colors">로그인</Link>
+                            <Link href="/auth/signup" className="bg-accent text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">회원가입</Link>
                         </>
                     )}
                 </div>
