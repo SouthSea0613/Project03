@@ -7,6 +7,8 @@ import com.Project03.backendspring.domain.user.entity.UserRole;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
 import com.Project03.backendspring.jwt.JwtDto;
 import com.Project03.backendspring.jwt.JwtUtil;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,19 +34,18 @@ public class AuthService {
                 return false;
             }
 
-            userRepository.save(
-                    User
-                            .builder()
-                            .username(signUpDto.getUsername())
-                            .password(passwordEncoder.encode(signUpDto.getPassword()))
-                            .name(signUpDto.getName())
-                            .email(signUpDto.getEmail())
-                            .postcode(signUpDto.getPostcode())
-                            .address(signUpDto.getAddress())
-                            .detailAddress(signUpDto.getDetail_address())
-                            .userRole(UserRole.USER)
-                            .build()
-            );
+            User user = User.builder()
+                    .username(signUpDto.getUsername())
+                    .password(passwordEncoder.encode(signUpDto.getPassword()))
+                    .name(signUpDto.getName())
+                    .email(signUpDto.getEmail())
+                    .postcode(signUpDto.getPostcode())
+                    .address(signUpDto.getAddress())
+                    .detailAddress(signUpDto.getDetail_address())
+                    .userRole(UserRole.USER)
+                    .build();
+            log.info(user.toString());
+            userRepository.save(user);
             return true;
         }
         catch (Exception e) {
@@ -81,6 +82,14 @@ public class AuthService {
     @Transactional
     public void logout(String username) {
         userRepository.updateRefreshToken(username);
+    }
+
+    public Claims getUserInfoFromToken(String token) {
+        return jwtUtil.getUserInfoFromToken(token);
+    }
+
+    public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
+        return jwtUtil.getJwtFromHeader(httpServletResponse);
     }
 
     public String createNewAccessToken(String refreshToken) {

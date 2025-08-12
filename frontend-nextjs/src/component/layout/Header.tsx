@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { springFetcher } from "@/lib/api";
 
 const Header = () => {
-    const { user, isLoading, setAccessToken, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, setAccessToken, logout } = useAuth();
 
     const router = useRouter();
 

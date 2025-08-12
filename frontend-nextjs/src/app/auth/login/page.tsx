@@ -1,19 +1,21 @@
 'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { springFetcher } from "@/lib/api";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import {useAuth} from "@/context/AuthContext";
+import {springFetcher} from "@/lib/api";
 import Link from "next/link";
 
 export default function LoginPage() {
     const { checkAuth, setAccessToken } = useAuth();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [error, setError] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
 
         springFetcher('/api/auth/login', {
             method: 'POST',
