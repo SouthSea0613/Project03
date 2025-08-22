@@ -42,12 +42,14 @@ public class DevSecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/**").permitAll()
-                                // .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                                // .requestMatchers("/api/test").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtUtil, userDetailsService), 
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return httpSecurity.build();
     }
@@ -55,13 +57,24 @@ public class DevSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+        
+        // 허용할 오리진 설정
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
+        
+        // 허용할 HTTP 메서드 설정
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("*"));
+        
+        // 허용할 헤더 설정
+        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        
+        // 쿠키 허용
         corsConfiguration.setAllowCredentials(true);
+        
+        // 노출할 헤더 설정
         corsConfiguration.addExposedHeader("Authorization");
-        corsConfiguration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
-                "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
+        
+        // 프리플라이트 요청 캐시 시간 (1시간)
+        corsConfiguration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);

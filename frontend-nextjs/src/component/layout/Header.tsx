@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { springFetcher } from "@/lib/api";
 
 const Header = () => {
-    const { user, isAuthenticated, isLoading, setAccessToken, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
 
     const router = useRouter();
 
     const handleLogout = async () => {
+        try {
             await springFetcher('/api/auth/logout', {
                 method: 'POST',
                 headers: {
@@ -18,16 +19,18 @@ const Header = () => {
                 },
                 credentials: 'include',
                 body: JSON.stringify({
-                    username:user?.username,
+                    username: user?.username,
                 }),
-            }).then(()=>{
-                alert("로그아웃되었습니다")
-                router.push("/");
-                setAccessToken("");
-                logout();
-            }).catch(err => {
-                console.log(err)
-            })
+            });
+            alert("로그아웃되었습니다.");
+        }
+        catch (error) {
+            console.error(error);
+            alert("로그아웃 중 오류가 발생했습니다.");
+        }
+        finally {
+            logout();
+        }
     };
 
     return (

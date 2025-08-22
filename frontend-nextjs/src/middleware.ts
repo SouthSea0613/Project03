@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
-import { authFetcher } from "@/lib/api";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET;
 
@@ -24,38 +23,27 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-        if(!JWT_SECRET_KEY) {
-            throw new Error("jwt없어");
+        if (!JWT_SECRET_KEY) {
+            console.error('JWT_SECRET_KEY is not defined');
+            throw new Error('JWT secret key is not configured');
         }
 
         const secret = new TextEncoder().encode(JWT_SECRET_KEY);
         await jwtVerify(token, secret);
 
+        // 로그인된 사용자가 로그인/회원가입 페이지에 접근하는 경우 홈으로 리다이렉트
         if (pathname === '/auth/login' || pathname === '/auth/signup') {
             return NextResponse.redirect(new URL('/', request.url));
         }
 
-        authFetcher(
-            '/api/auth/checkAuth',
-            {
-                method: 'POST',
-                credentials: 'include',
-            },
-            "spring",
-        ).then(res => {
-            if (res.data.success) {
-                alert("다른 컴퓨터에서 로그인 되었습니다")
-                alert("로그아웃 됩니다")
-            }
-        })
-        .catch(()=>{
-            alert("에러발생")
-        })
-
         return NextResponse.next();
     } catch (error) {
+        console.error('JWT verification failed:', error);
+        
+        // 토큰이 유효하지 않은 경우 쿠키 삭제 후 로그인 페이지로 리다이렉트
         const response = NextResponse.redirect(new URL('/auth/login', request.url));
-        response.cookies.delete('token');
+        response.cookies.delete('accessToken');
+        response.cookies.delete('refreshToken');
         return response;
     }
 }

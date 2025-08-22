@@ -7,7 +7,7 @@ import {springFetcher} from "@/lib/api";
 import Link from "next/link";
 
 export default function LoginPage() {
-    const { checkAuth, setAccessToken } = useAuth();
+    const { checkAuth } = useAuth();
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('');
@@ -30,13 +30,12 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    setAccessToken(res.data.data);
+                    // 서버에서 쿠키로 토큰을 설정하므로 별도로 저장할 필요 없음
                     checkAuth();
                     alert(res.data.message);
                     router.push("/");
                 }else{
                     alert(res.data.message);
-                    router.push("/auth/login");
                 }
             })
             .catch(err => {
