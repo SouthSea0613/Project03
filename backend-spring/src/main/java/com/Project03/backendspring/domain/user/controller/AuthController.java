@@ -19,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -43,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
         JwtDto jwtDto = authService.login(loginDto);
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
@@ -55,15 +53,7 @@ public class AuthController {
                 .build()
                 .toString()
         );
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken",jwtDto.getAccessToken())
-                .maxAge(30 * 60)
-                .path("/")
-                .secure(true)
-                .sameSite("None")
-                .build()
-                .toString()
-        );
-        httpServletResponse.setHeader("Authorization", "Bearer" + jwtDto.getAccessToken());
+        httpServletResponse.setHeader("Authorization", "Bearer " + jwtDto.getAccessToken());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -77,19 +67,11 @@ public class AuthController {
         }
 
         String newAccessToken = authService.createNewAccessToken(refreshToken);
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
-                .from("accessToken", newAccessToken)
-                .maxAge(30 * 60)
-                .path("/")
-                .secure(true)
-                .sameSite("None")
-                .build()
-                .toString()
-        );
+        httpServletResponse.setHeader("Authorization", "Bearer " + newAccessToken);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(new MessageDto(true, "AccessToken 재발급 겅공"));
+                .body(new MessageDto(true, "AccessToken 재발급 성공"));
     }
 
     @PostMapping("/logout")
@@ -97,17 +79,11 @@ public class AuthController {
         try{
             authService.logout(loginDto.getUsername());
 
-            return ResponseEntity.status(HttpStatus.CREATED)
+            return ResponseEntity.status(HttpStatus.OK)
                     .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
                             .maxAge(0)
                             .path("/")
                             .httpOnly(true)
-                            .build()
-                            .toString()
-                    )
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken", null)
-                            .maxAge(0)
-                            .path("/")
                             .build()
                             .toString()
                     )
@@ -159,8 +135,8 @@ public class AuthController {
 
     @PostMapping("/checkAuth")
     public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
-        if (!Objects.equals(authService.checkRefreshToken(refreshToken), refreshToken)) {
-            return ResponseEntity.status(HttpStatus.CREATED)
+        if (!authService.checkRefreshToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
                             .maxAge(0)
                             .path("/")
@@ -168,15 +144,9 @@ public class AuthController {
                             .build()
                             .toString()
                     )
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken", null)
-                            .maxAge(0)
-                            .path("/")
-                            .build()
-                            .toString()
-                    )
-                    .body(new MessageDto(true, "이중 접속 로그아웃"));
+                    .body(new MessageDto(false, "이중 접속 로그아웃"));
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(false, "로그인 상태 유지"));
+        return ResponseEntity.status(HttpStatus.OK).body(new MessageDto(true, "로그인 상태 유지"));
     }
 }

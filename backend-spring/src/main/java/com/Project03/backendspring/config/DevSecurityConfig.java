@@ -43,8 +43,6 @@ public class DevSecurityConfig {
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers("/**").permitAll()
-                                // .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                                // .requestMatchers("/api/test").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);

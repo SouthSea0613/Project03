@@ -5,7 +5,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -62,14 +61,6 @@ public class JwtUtil {
         return null;
     }
 
-    public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
-        String bearerToken = httpServletResponse.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
-
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -94,7 +85,7 @@ public class JwtUtil {
         Cookie[] cookies = httpServletRequest.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refreshToken")) { // 쿠키 이름이 "token"인 경우
+                if (cookie.getName().equals("refreshToken")) {
                     return cookie.getValue();
                 }
             }

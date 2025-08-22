@@ -30,13 +30,15 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    setAccessToken(res.data.data);
-                    checkAuth();
-                    alert(res.data.message);
-                    router.push("/");
+                    const accessToken = res.headers.get('Authorization')?.replace('Bearer ', '');
+                    if (accessToken) {
+                        setAccessToken(accessToken);
+                        checkAuth();
+                        alert(res.data.message);
+                        router.push("/");
+                    }
                 }else{
                     alert(res.data.message);
-                    router.push("/auth/login");
                 }
             })
             .catch(err => {

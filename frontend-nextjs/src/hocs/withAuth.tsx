@@ -7,12 +7,12 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         const { user, isAuthenticated, isLoading } = useAuth();
         const router = useRouter();
         useEffect(() => {
-            if (!isLoading && !isAuthenticated) {
-                router.replace('/login');
+            if (!isLoading && !isAuthenticated()) {
+                router.replace('/auth/login');
             }
         }, [user, isAuthenticated, isLoading, router]);
 
-        if (isLoading || !isAuthenticated) {
+        if (isLoading || !isAuthenticated()) {
             return <div>Loading...</div>;
         }
 

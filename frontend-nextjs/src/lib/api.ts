@@ -26,11 +26,13 @@ export const fastApiFetcher = async (path: string, options?: RequestInit) => {
     const response = await fetch(url, options);
     return handleResponse(response);
 };
+
 type ApiType = 'spring' | 'fastapi';
 
 export const authFetcher = async (path: string, options: RequestInit = {}, apiType: ApiType) => {
     const accessToken = Cookies.get('accessToken');
     const headers = new Headers(options.headers);
+    
     if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);
     }
@@ -41,20 +43,25 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
     try {
         return await fetcher(path, options);
     } catch (error: any) {
-        if (error.status === 401) {
+        if (error.message.includes('401')) {
             try {
                 const refreshResponse = await springFetcher('/api/auth/refresh', {
                     method: 'POST',
                     credentials: 'include',
                 });
 
-                const newAccessToken = refreshResponse.data.accessToken;
-
-                headers.set('Authorization', `Bearer ${newAccessToken}`);
-                options.headers = headers;
-
-                return await fetcher(path, options);
+                const newAccessToken = refreshResponse.headers.get('Authorization')?.replace('Bearer ', '');
+                
+                if (newAccessToken) {
+                    Cookies.set('accessToken', newAccessToken, { expires: 0.5 }); // 30분
+                    headers.set('Authorization', `Bearer ${newAccessToken}`);
+                    options.headers = headers;
+                    return await fetcher(path, options);
+                }
             } catch (refreshError) {
+                // 리프레시 토큰도 만료된 경우
+                Cookies.remove('accessToken');
+                Cookies.remove('refreshToken');
                 throw refreshError;
             }
         }

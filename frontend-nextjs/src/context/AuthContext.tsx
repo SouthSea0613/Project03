@@ -32,7 +32,6 @@ const IdleTimeoutHandler = () => {
         logout();
     }, [logout]);
 
-    // 30분 = 1800초
     useIdleTimeout(handleIdle, 1800);
 
     return null;
@@ -45,7 +44,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
 
-    const checkAuth = () =>{
+    const checkAuth = () => {
         authFetcher('/api/auth/user/me',{
                 method: 'GET',
                 credentials:'include'
@@ -53,6 +52,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         ).then(res => {
             setUser(res.data.data);
         }).catch(err => {
+            console.error('Auth check failed:', err);
         })
     }
 
@@ -68,18 +68,24 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setAccessToken = (accessToken: string) => {
         setAccessTokenstate(accessToken);
+        Cookies.set('accessToken', accessToken, { expires: 0.5 }); // 30분
     }
 
-    const isAuthenticated = () =>{
+    const isAuthenticated = () => {
         return !!user;
     }
 
-    const logout = () =>{
+    const logout = () => {
         setUser(null);
+        setAccessTokenstate(null);
+        setIsLoggedIn(false);
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        router.push('/');
     }
 
     return (
-        <AuthContext.Provider value={{ user,accessToken, setAccessToken, isAuthenticated, isLoading, checkAuth, logout }}>
+        <AuthContext.Provider value={{ user, accessToken, setAccessToken, isAuthenticated, isLoading, checkAuth, logout }}>
             {children}
             {isLoggedIn && <IdleTimeoutHandler />}
         </AuthContext.Provider>

@@ -61,7 +61,7 @@ export default function Signup() {
                 username,
             })
         }).then(res => {
-            const isAvailable = res.data;
+            const isAvailable = res.data.success;
             setIderror(isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.");
         }).catch(err => {
             setIderror("아이디 중복 확인 중 오류가 발생했습니다.");
@@ -78,7 +78,7 @@ export default function Signup() {
                 email,
             })
         }).then(res => {
-            const isAvailable = res.data;
+            const isAvailable = res.data.success;
             setEmailerror(isAvailable ? "사용 가능한 이메일입니다." : "이미 사용중인 이메일입니다.");
         })
             .catch(err => {

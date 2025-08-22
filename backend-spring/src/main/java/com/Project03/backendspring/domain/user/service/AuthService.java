@@ -8,7 +8,6 @@ import com.Project03.backendspring.domain.user.repository.UserRepository;
 import com.Project03.backendspring.jwt.JwtDto;
 import com.Project03.backendspring.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -84,26 +83,21 @@ public class AuthService {
         userRepository.updateRefreshToken(username);
     }
 
-    public Claims getUserInfoFromToken(String token) {
-        return jwtUtil.getUserInfoFromToken(token);
-    }
-
-    public String getJwtFromHeader(HttpServletResponse httpServletResponse) {
-        return jwtUtil.getJwtFromHeader(httpServletResponse);
-    }
-
     public String createNewAccessToken(String refreshToken) {
-        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
-        String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
-        return  jwtUtil.createAccessToken(username, role);
+        Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
+        String username = claims.getSubject();
+        String role = claims.get("role", String.class);
+        return jwtUtil.createAccessToken(username, role);
     }
 
     public boolean validateToken(String refreshToken) {
         return jwtUtil.validateToken(refreshToken);
     }
 
-    public String checkRefreshToken(String refreshToken) {
-        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken));
-        return userRepository.findRefreshToken(username);
+    public boolean checkRefreshToken(String refreshToken) {
+        Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
+        String username = claims.getSubject();
+        String storedRefreshToken = userRepository.findRefreshToken(username);
+        return refreshToken.equals(storedRefreshToken);
     }
 }

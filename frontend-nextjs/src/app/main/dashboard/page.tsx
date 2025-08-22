@@ -1,6 +1,11 @@
+'use client';
+
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardPage() {
+    const { user, isAuthenticated } = useAuth();
+
     return (
         <main className="flex-grow container mx-auto px-4 py-16 text-center">
             <div className="max-w-3xl mx-auto">
@@ -15,18 +20,37 @@ export default function DashboardPage() {
                     Project03은 최고의 개발자, 디자이너, 기획자를 연결하여 멋진 프로젝트를 함께 만들어나가는 플랫폼입니다.
                 </p>
                 <div className="flex justify-center space-x-4">
-                    <Link
-                        href="#"
-                        className="bg-accent text-white font-semibold px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105"
-                    >
-                        프로젝트 참여하기
-                    </Link>
-                    <Link
-                        href="#"
-                        className="bg-gray-700 text-text-main font-semibold px-8 py-3 rounded-lg hover:bg-gray-600 transition-transform transform hover:scale-105"
-                    >
-                        팀원 모집하기
-                    </Link>
+                    {isAuthenticated() ? (
+                        <>
+                            <Link
+                                href="#"
+                                className="bg-accent text-white font-semibold px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105"
+                            >
+                                프로젝트 참여하기
+                            </Link>
+                            <Link
+                                href="#"
+                                className="bg-gray-700 text-text-main font-semibold px-8 py-3 rounded-lg hover:bg-gray-600 transition-transform transform hover:scale-105"
+                            >
+                                팀원 모집하기
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/auth/login"
+                                className="bg-accent text-white font-semibold px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105"
+                            >
+                                로그인
+                            </Link>
+                            <Link
+                                href="/auth/signup"
+                                className="bg-gray-700 text-text-main font-semibold px-8 py-3 rounded-lg hover:bg-gray-600 transition-transform transform hover:scale-105"
+                            >
+                                회원가입
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
 
