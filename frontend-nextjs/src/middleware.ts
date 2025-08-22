@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
-import { authFetcher } from "@/lib/api";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET;
 
@@ -35,27 +34,14 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url));
         }
 
-        authFetcher(
-            '/api/auth/checkAuth',
-            {
-                method: 'POST',
-                credentials: 'include',
-            },
-            "spring",
-        ).then(res => {
-            if (res.data.success) {
-                alert("다른 컴퓨터에서 로그인 되었습니다")
-                alert("로그아웃 됩니다")
-            }
-        })
-        .catch(()=>{
-            alert("에러발생")
-        })
+        // 미들웨어에서는 API 호출을 피하고 JWT 검증만 수행
+        // 추가적인 인증 검증은 클라이언트 사이드에서 처리
 
         return NextResponse.next();
     } catch (error) {
         const response = NextResponse.redirect(new URL('/auth/login', request.url));
-        response.cookies.delete('token');
+        response.cookies.delete('accessToken');
+        response.cookies.delete('refreshToken');
         return response;
     }
 }

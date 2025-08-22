@@ -7,6 +7,7 @@ import com.Project03.backendspring.domain.user.entity.UserRole;
 import com.Project03.backendspring.domain.user.repository.UserRepository;
 import com.Project03.backendspring.jwt.JwtDto;
 import com.Project03.backendspring.jwt.JwtUtil;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -84,9 +85,22 @@ public class AuthService {
     }
 
     public String createNewAccessToken(String refreshToken) {
-        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("username"));
-        String role = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken).get("role"));
-        return  jwtUtil.createAccessToken(username, role);
+        // refreshToken 유효성 검증
+        if (!validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 refreshToken");
+        }
+        
+        Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
+        String username = claims.getSubject();
+        String role = claims.get("role", String.class);
+        
+        // DB에 저장된 refreshToken과 비교
+        String storedRefreshToken = userRepository.findRefreshToken(username);
+        if (!refreshToken.equals(storedRefreshToken)) {
+            throw new IllegalArgumentException("저장된 refreshToken과 일치하지 않습니다");
+        }
+        
+        return jwtUtil.createAccessToken(username, role);
     }
 
     public boolean validateToken(String refreshToken) {
@@ -94,7 +108,8 @@ public class AuthService {
     }
 
     public String checkRefreshToken(String refreshToken) {
-        String username = String.valueOf(jwtUtil.getUserInfoFromToken(refreshToken));
+        Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
+        String username = claims.getSubject();
         return userRepository.findRefreshToken(username);
     }
 }

@@ -28,13 +28,12 @@ export default function LoginPage() {
         })
             .then(res => {
                 if(res.data.success){
-                    setAccessToken(res.data.data);
+                    // 서버에서 쿠키로 토큰을 설정하므로 별도로 저장할 필요 없음
                     checkAuth();
                     alert(res.data.message);
                     router.push("/");
                 }else{
                     alert(res.data.message);
-                    router.push("/auth/login");
                 }
             })
             .catch(err => {

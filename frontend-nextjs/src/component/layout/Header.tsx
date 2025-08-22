@@ -21,12 +21,13 @@ const Header = () => {
                     username: user?.username,
                 }),
             });
+            alert("로그아웃되었습니다.");
         }
         catch (error) {
             console.error(error);
+            alert("로그아웃 중 오류가 발생했습니다.");
         }
         finally {
-            alert("logged out");
             logout();
         }
     };

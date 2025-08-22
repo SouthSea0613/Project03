@@ -7,20 +7,20 @@ import { useRouter } from 'next/navigation';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
 
 interface User {
-    username : string,
-    email : string,
-    name : string
+    username: string;
+    email: string;
+    name: string;
 }
 
 interface AuthContextType {
-    user: User | null,
-    accessToken: string | null,
-    setAccessToken: (accessToken: string) => void,
-    isAuthenticated: () => boolean,
-    isLoading: boolean,
-    checkAuth : () => void,
-    logout: () => void,
-    isLoggedIn: boolean,
+    user: User | null;
+    accessToken: string | null;
+    setAccessToken: (accessToken: string | null) => void;
+    isAuthenticated: () => boolean;
+    isLoading: boolean;
+    checkAuth: () => void;
+    logout: () => void;
+    isLoggedIn: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,57 +46,69 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
 
-    const checkAuth = useCallback(() =>{
-        authFetcher('/api/auth/user/me',{
+    const logout = useCallback(() => {
+        setUser(null);
+        setAccessToken(null);
+        setIsLoggedIn(false);
+        router.push('/');
+    }, [router]);
+
+    const checkAuth = useCallback(() => {
+        authFetcher('/api/auth/user/me', {
                 method: 'GET',
-                credentials:'include'
-            },'spring',
+                credentials: 'include'
+            }, 'spring',
         ).then(res => {
             setUser(res.data.data);
-            setIsLoading(true);
+            setIsLoading(false);
         }).catch(err => {
+            console.error('인증 확인 실패:', err);
             logout();
-        })
-    }, []);
+            setIsLoading(false);
+        });
+    }, [logout]);
 
     useEffect(() => {
         const token = Cookies.get('accessToken');
-        if(token) {
+        if (token) {
             setAccessTokenState(token);
             checkAuth();
+        } else {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [checkAuth]);
 
     const setAccessToken = (accessToken: string | null) => {
         setAccessTokenState(accessToken);
         if (accessToken) {
-            Cookies.set('accessToken', accessToken, { expires: 1 / 48, secure: true, sameSite: 'strict' });
+            // 서버에서 쿠키로 설정하므로 클라이언트에서는 별도 저장 불필요
             setIsLoggedIn(true);
-        }
-        else {
-            Cookies.remove('accessToken');
+        } else {
             setIsLoggedIn(false);
         }
-    }
+    };
 
-    const isAuthenticated = () =>{
+    const isAuthenticated = () => {
         return !!user;
-    }
+    };
 
-    const logout = () =>{
-        setUser(null);
-        setAccessToken(null);
-        setIsLoggedIn(false);
-        router.push('/');
-    }
-
-    return (
-        <AuthContext.Provider value={{ user, accessToken, setAccessToken, isAuthenticated, isLoading, checkAuth, logout, isLoggedIn }}>
-            {children}
-            {isLoggedIn && <IdleTimeoutHandler />}
-        </AuthContext.Provider>
-    );
+            return (
+            <AuthContext.Provider 
+                value={{ 
+                    user, 
+                    accessToken, 
+                    setAccessToken, 
+                    isAuthenticated, 
+                    isLoading, 
+                    checkAuth, 
+                    logout, 
+                    isLoggedIn 
+                }}
+            >
+                {children}
+                {isLoggedIn && <IdleTimeoutHandler />}
+            </AuthContext.Provider>
+        );
 };
 
 export function useAuth() {
