@@ -1,22 +1,20 @@
 'use client'
-
-import {useState} from "react";
-import {useRouter} from "next/navigation";
-import {useAuth} from "@/context/AuthContext";
-import {springFetcher} from "@/lib/api";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { springFetcher } from "@/lib/api";
+import { safeAlert, extractTokenFromHeader } from "@/lib/utils";
 import Link from "next/link";
 
 export default function LoginPage() {
     const { checkAuth, setAccessToken } = useAuth();
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-
+        
         springFetcher('/api/auth/login', {
             method: 'POST',
             headers: {
@@ -29,27 +27,20 @@ export default function LoginPage() {
             credentials: 'include',
         })
             .then(res => {
-                if(res.data.success){
-                    const accessToken = res.headers.get('Authorization')?.replace('Bearer ', '');
+                if (res.data.success) {
+                    const accessToken = extractTokenFromHeader(res.headers.get('Authorization'));
                     if (accessToken) {
                         setAccessToken(accessToken);
-                        if (typeof window !== 'undefined') {
-                            alert(res.data.message);
-                        }
-                        // 로그인 성공 후 사용자 정보 조회 및 페이지 이동
+                        safeAlert(res.data.message);
                         checkAuth();
                         router.push("/");
                     }
-                }else{
-                    if (typeof window !== 'undefined') {
-                        alert(res.data.message);
-                    }
+                } else {
+                    safeAlert(res.data.message);
                 }
             })
             .catch(err => {
-                if (typeof window !== 'undefined') {
-                    alert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
-                }
+                safeAlert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
             });
     }
 

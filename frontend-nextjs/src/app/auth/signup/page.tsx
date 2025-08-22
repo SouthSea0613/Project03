@@ -1,8 +1,8 @@
 'use client'
-
 import { useState } from "react";
 import { springFetcher } from '@/lib/api';
 import { useRouter } from "next/navigation";
+import { safeAlert } from '@/lib/utils';
 import Link from "next/link";
 
 export default function Signup() {
@@ -17,7 +17,6 @@ export default function Signup() {
     const [iderror, setIderror] = useState<string | null>(null);
     const [emailerror, setEmailerror] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
-
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +26,7 @@ export default function Signup() {
             return;
         }
         setPasswordError(null);
-
+        
         springFetcher('/api/auth/signup', {
             method: 'POST',
             headers: {
@@ -43,15 +42,11 @@ export default function Signup() {
                 detail_address,
             })
         }).then(res => {
-            if (typeof window !== 'undefined') {
-                alert('회원가입 성공! 로그인 페이지로 이동합니다.');
-            }
+            safeAlert('회원가입 성공! 로그인 페이지로 이동합니다.');
             router.push('/auth/login');
         })
             .catch(err => {
-                if (typeof window !== 'undefined') {
-                    alert('회원가입 중 오류가 발생했습니다.');
-                }
+                safeAlert('회원가입 중 오류가 발생했습니다.');
             })
     }
 
@@ -115,7 +110,7 @@ export default function Signup() {
                     </div>
                     <div className="flex space-x-2">
                         <input type="text" placeholder="우편번호" onChange={(e) => setPostcode(e.target.value)} className="bg-gray-700 text-text-main w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-                        <button type="button" /*onClick={handleSearchAddress}*/ className="bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-500 transition-colors">주소검색</button>
+                        <button type="button" className="bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-500 transition-colors">주소검색</button>
                     </div>
                     <div>
                         <input type="text" placeholder="주소" onChange={(e) => setAddress(e.target.value)} className="bg-gray-700 text-text-main w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />

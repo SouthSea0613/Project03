@@ -5,11 +5,12 @@ import { authFetcher } from "@/lib/api";
 import Cookies from "js-cookie";
 import { useRouter } from 'next/navigation';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
+import { safeAlert } from '@/lib/utils';
 
 interface User {
-    username : string,
-    email : string,
-    name : string
+    username: string,
+    email: string,
+    name: string
 }
 
 interface AuthContextType {
@@ -18,7 +19,7 @@ interface AuthContextType {
     setAccessToken: (accessToken: string) => void,
     isAuthenticated: () => boolean,
     isLoading: boolean,
-    checkAuth : () => void,
+    checkAuth: () => void,
     logout: () => void,
 }
 
@@ -26,16 +27,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const IdleTimeoutHandler = () => {
     const { logout } = useAuth();
-
     const handleIdle = useCallback(() => {
-        if (typeof window !== 'undefined') {
-            alert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
-        }
+        safeAlert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
         logout();
     }, [logout]);
-
+    
     useIdleTimeout(handleIdle, 1800);
-
     return null;
 };
 
@@ -47,16 +44,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
 
     const checkAuth = () => {
-        authFetcher('/api/auth/user/me',{
-                method: 'GET',
-                credentials:'include'
-            },'spring',
+        authFetcher('/api/auth/user/me', {
+            method: 'GET',
+            credentials: 'include'
+        }, 'spring',
         ).then(res => {
             setUser(res.data.data);
         }).catch(err => {
             console.error('Auth check failed:', err);
-            
-            // 401 에러인 경우에만 상태 초기화
             if (err.message.includes('401')) {
                 setUser(null);
                 setAccessTokenstate(null);
@@ -69,10 +64,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const token = Cookies.get('accessToken');
-        if(token) {
+        if (token) {
             setAccessTokenstate(token);
             setIsLoggedIn(true);
-            // 토큰이 있을 때만 사용자 정보 조회
             checkAuth();
         }
         setIsLoading(false);
@@ -80,8 +74,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setAccessToken = (accessToken: string) => {
         setAccessTokenstate(accessToken);
-        // 30분 = 1/48일
-        Cookies.set('accessToken', accessToken, { expires: 1/48 });
+        Cookies.set('accessToken', accessToken, { expires: 1/48 }); // 30분
     }
 
     const isAuthenticated = () => {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { springFetcher } from "@/lib/api";
+import { safeAlert } from '@/lib/utils';
 
 const Header = () => {
     const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -21,13 +22,10 @@ const Header = () => {
                     username: user?.username,
                 }),
             });
-            if (typeof window !== 'undefined') {
-                alert("로그아웃되었습니다");
-            }
+            safeAlert("로그아웃되었습니다");
             logout();
         } catch (err) {
             console.error('Logout error:', err);
-            // 서버 로그아웃이 실패해도 클라이언트에서는 로그아웃 처리
             logout();
         }
     };

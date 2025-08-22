@@ -3,6 +3,7 @@ package com.Project03.backendspring.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,40 +19,41 @@ import java.util.Date;
 public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer";
+    
     private final long ACCESS_TOKEN_TIME = 30 * 60 * 1000L;
     private final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
-
+    
     @Value("${jwt.secret.key}")
     private String secretKey;
+    
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
+    
     @PostConstruct
     public void init() {
         byte[] bytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(bytes);
     }
-
+    
     public String createAccessToken(String username, String role) {
         return createToken(username, role, ACCESS_TOKEN_TIME);
     }
-
+    
     public String createRefreshToken(String username, String role) {
         return createToken(username, role, REFRESH_TOKEN_TIME);
     }
-
+    
     public String createToken(String username, String role, long tokenTime) {
         Date date = new Date();
-
         return Jwts.builder()
-                        .setSubject(username)
-                        .claim("role", role)
-                        .setExpiration(new Date(date.getTime() + tokenTime))
-                        .setIssuedAt(date)
-                        .signWith(key, signatureAlgorithm)
-                        .compact();
+                .setSubject(username)
+                .claim("role", role)
+                .setExpiration(new Date(date.getTime() + tokenTime))
+                .setIssuedAt(date)
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
-
+    
     public String resolveToken(HttpServletRequest httpServletRequest) {
         String bearerToken = httpServletRequest.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
@@ -59,7 +61,7 @@ public class JwtUtil {
         }
         return null;
     }
-
+    
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -75,8 +77,20 @@ public class JwtUtil {
         }
         return false;
     }
-
+    
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+    
+    public String getTokenFromCookie(HttpServletRequest httpServletRequest) {
+        Cookie[] cookies = httpServletRequest.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refreshToken")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

@@ -21,18 +21,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
+    
     @Transactional
     public boolean signup(SignUpDto signUpDto) {
         try {
             if (userRepository.existsByUsername(signUpDto.getUsername())) {
                 return false;
             }
-
             if (userRepository.existsByEmail(signUpDto.getEmail())) {
                 return false;
             }
-
+            
             User user = User.builder()
                     .username(signUpDto.getUsername())
                     .password(passwordEncoder.encode(signUpDto.getPassword()))
@@ -43,57 +42,56 @@ public class AuthService {
                     .detailAddress(signUpDto.getDetail_address())
                     .userRole(UserRole.USER)
                     .build();
-            log.info(user.toString());
+            
             userRepository.save(user);
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
-
+    
     @Transactional
     public JwtDto login(LoginDto loginDto) {
         User user = userRepository
                 .findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
+        
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }else{
-            String accessToken = jwtUtil.createAccessToken(user.getUsername(),user.getUserRole().name());
-            String refreshToken = jwtUtil.createRefreshToken(user.getUsername(),user.getUserRole().name());
-            user.setRefreshToken(refreshToken);
-            userRepository.save(user);
-
-            return new JwtDto(refreshToken, accessToken);
         }
+        
+        String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getUserRole().name());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUsername(), user.getUserRole().name());
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+        
+        return new JwtDto(refreshToken, accessToken);
     }
-
+    
     public boolean checkUsername(String username) {
         return !userRepository.existsByUsername(username);
     }
-
+    
     public boolean checkEmail(String email) {
         return !userRepository.existsByEmail(email);
     }
-
+    
     @Transactional
     public void logout(String username) {
         userRepository.updateRefreshToken(username);
     }
-
+    
     public String createNewAccessToken(String refreshToken) {
         Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
         String username = claims.getSubject();
         String role = claims.get("role", String.class);
         return jwtUtil.createAccessToken(username, role);
     }
-
+    
     public boolean validateToken(String refreshToken) {
         return jwtUtil.validateToken(refreshToken);
     }
-
+    
     public boolean checkRefreshToken(String refreshToken) {
         Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
         String username = claims.getSubject();
