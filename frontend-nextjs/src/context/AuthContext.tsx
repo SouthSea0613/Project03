@@ -31,7 +31,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    const isAuthenticated = !!accessToken && !!user; // 파생된 상태
+    const isAuthenticated = !!accessToken && !!user;
 
     const checkAuth = useCallback(() => {
         authFetcher('/api/auth/user/me', {
@@ -62,7 +62,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setAccessToken = useCallback((accessToken: string) => {
         setAccessTokenstate(accessToken);
-        Cookies.set('accessToken', accessToken, { expires: 1/48 }); // 30분
+        Cookies.set('accessToken', accessToken, { expires: 1/48 });
     }, []);
 
     const logout = useCallback(() => {

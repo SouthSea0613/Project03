@@ -41,10 +41,8 @@ public class DevSecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                // Swagger, h2-console 등 개발용 경로 허용
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                // ProdSecurityConfig와 동일하게 인증 로직 적용
                                 .requestMatchers("/auth/**").permitAll()
                                 .anyRequest().authenticated()
                 )

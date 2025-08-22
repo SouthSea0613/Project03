@@ -53,7 +53,7 @@ export const authFetcher = async (path: string, options: RequestInit = {}, apiTy
                 
                 const newAccessToken = refreshResponse.headers.get('Authorization')?.replace('Bearer ', '');
                 if (newAccessToken) {
-                    Cookies.set('accessToken', newAccessToken, { expires: 1/48 }); // 30분
+                    Cookies.set('accessToken', newAccessToken, { expires: 1/48 });
                     headers.set('Authorization', `Bearer ${newAccessToken}`);
                     options.headers = headers;
                     return await fetcher(path, options);

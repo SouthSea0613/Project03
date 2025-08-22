@@ -30,13 +30,11 @@ const Header = () => {
                 <Link href="/" className="text-2xl font-bold text-text-main">
                     Project03
                 </Link>
-
                 <nav className="hidden md:flex items-center space-x-6 text-text-main">
                     <Link href="#" className="hover:text-primary transition-colors">프로젝트 찾기</Link>
                     <Link href="#" className="hover:text-primary transition-colors">팀원 모집</Link>
                     <Link href="#" className="hover:text-primary transition-colors">프로젝트 요청</Link>
                 </nav>
-
                 <div className="flex items-center space-x-4">
                     {isLoading ? (
                         <div className="h-8 w-24 bg-border rounded-md animate-pulse"></div>

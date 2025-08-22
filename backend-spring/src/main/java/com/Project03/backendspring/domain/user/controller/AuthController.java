@@ -71,23 +71,20 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<MessageDto> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
-            // SecurityContext에서 직접 사용자 이름 가져오기
             authService.logout(userDetails.getUsername());
             
-            // 쿠키 삭제를 위한 헤더 생성
             ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
                     .maxAge(0)
                     .path("/")
                     .httpOnly(true)
-                    .secure(true) // HTTPS 환경에서만 전송
-                    .sameSite("None") // Cross-site 요청 허용
+                    .secure(true)
+                    .sameSite("None")
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(new MessageDto(true, "로그아웃 성공"));
         } catch (Exception e) {
-            // userDetails가 null일 경우 등 예외 처리
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패: 인증되지 않은 사용자입니다."));
         }
     }
