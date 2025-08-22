@@ -43,13 +43,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto, HttpServletResponse httpServletResponse) {
-        log.info("로그인 시도: {}", loginDto.getUsername());
+    public ResponseEntity<MessageDto> login(@RequestBody LoginDto loginDto,HttpServletResponse httpServletResponse) {
         JwtDto jwtDto = authService.login(loginDto);
 
-        // Refresh Token 쿠키 설정
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
-                .from("refreshToken", jwtDto.getRefreshToken())
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
                 .maxAge(7 * 24 * 60 * 60)
                 .path("/")
                 .secure(true)
@@ -58,22 +55,16 @@ public class AuthController {
                 .build()
                 .toString()
         );
-
-        // Access Token 쿠키 설정
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
-                .from("accessToken", jwtDto.getAccessToken())
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken",jwtDto.getAccessToken())
                 .maxAge(30 * 60)
                 .path("/")
                 .secure(true)
-                .httpOnly(true)
                 .sameSite("None")
                 .build()
                 .toString()
         );
+        httpServletResponse.setHeader("Authorization", "Bearer" + jwtDto.getAccessToken());
 
-        httpServletResponse.setHeader("Authorization", "Bearer " + jwtDto.getAccessToken());
-
-        log.info("로그인 성공: {}", loginDto.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new MessageDto(true, "로그인 성공"));
@@ -81,82 +72,55 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse httpServletResponse) {
-        if (refreshToken == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageDto(false, "refreshToken이 없습니다"));
+        if (refreshToken == null || !authService.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "유효하지않은 refreshToken"));
         }
 
-        try {
-            String newAccessToken = authService.createNewAccessToken(refreshToken);
-            
-            // 새로운 Access Token 쿠키 설정
-            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
-                    .from("accessToken", newAccessToken)
-                    .maxAge(30 * 60)
-                    .path("/")
-                    .secure(true)
-                    .httpOnly(true)
-                    .sameSite("None")
-                    .build()
-                    .toString()
-            );
+        String newAccessToken = authService.createNewAccessToken(refreshToken);
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie
+                .from("accessToken", newAccessToken)
+                .maxAge(30 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .build()
+                .toString()
+        );
 
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ApiResponseDto(true, "AccessToken 재발급 성공", newAccessToken));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageDto(false, e.getMessage()));
-        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new MessageDto(true, "AccessToken 재발급 겅공"));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<MessageDto> logout(@RequestBody LoginDto loginDto) {
-        log.info("로그아웃 시도: {}", loginDto.getUsername());
-        try {
+        try{
             authService.logout(loginDto.getUsername());
 
-            // 쿠키 삭제를 위한 빈 값 설정
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("refreshToken", "")
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
                             .maxAge(0)
                             .path("/")
                             .httpOnly(true)
-                            .secure(true)
-                            .sameSite("None")
                             .build()
                             .toString()
                     )
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("accessToken", "")
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken", null)
                             .maxAge(0)
                             .path("/")
-                            .httpOnly(true)
-                            .secure(true)
-                            .sameSite("None")
                             .build()
                             .toString()
                     )
                     .body(new MessageDto(true, "로그아웃 성공"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageDto(false, "로그아웃 실패"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageDto(false, "로그아웃 실패"));
         }
     }
 
     @GetMapping("/user/me")
-    public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ApiResponseDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         User user = userDetails.getUser();
-        UserInfoDto userInfoDto = new UserInfoDto(
-                user.getUsername(), 
-                user.getUsername(), 
-                user.getEmail()
-        );
+        UserInfoDto userInfoDto = new UserInfoDto(user.getUsername(), user.getUsername(), user.getEmail());
         return ResponseEntity.ok(new ApiResponseDto(true, "유효한 토큰 & user 정보 조회", userInfoDto));
     }
 
@@ -166,71 +130,53 @@ public class AuthController {
             MessageDto responseDto = new MessageDto();
             return ResponseEntity.badRequest().body(responseDto);
         }
-        
         try {
             boolean isAvailable = authService.checkUsername(signUpDto.getUsername());
-            String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.";
+            String message = isAvailable?"사용 가능한 아이디입니다.":"이미 사용중인 아이디입니다.";
             MessageDto responseDto = new MessageDto(isAvailable, message);
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             MessageDto responseDto = new MessageDto(false, "아이디 중복 확인 중 오류 발생");
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(responseDto);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
 
     @PostMapping("/checkEmail")
     public ResponseEntity<MessageDto> checkEmail(@RequestBody SignUpDto signUpDto) {
         if (signUpDto.getEmail() == null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageDto(false, "잘못된 요청"));
+            return ResponseEntity.badRequest().body(new MessageDto(false, "잘못된 요청"));
         }
 
         try {
             boolean isAvailable = authService.checkEmail(signUpDto.getEmail());
-            String message = isAvailable ? "사용 가능한 이메일입니다." : "이미 사용중인 이메일입니다.";
-            return ResponseEntity.ok(new MessageDto(isAvailable, message));
+            String message = isAvailable?"사용 가능한 이메일입니다.":"이미 사용중인 이메일입니다.";
+            return ResponseEntity.ok(new MessageDto(isAvailable,message));
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageDto(false, "이메일 중복 확인 중 오류 발생"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(false, "아이디 중복 확인 중 오류 발생"));
         }
     }
 
     @PostMapping("/checkAuth")
     public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
         if (!Objects.equals(authService.checkRefreshToken(refreshToken), refreshToken)) {
-            // 이중 접속 감지 시 쿠키 삭제
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("refreshToken", "")
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
                             .maxAge(0)
                             .path("/")
                             .httpOnly(true)
-                            .secure(true)
-                            .sameSite("None")
                             .build()
                             .toString()
                     )
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie
-                            .from("accessToken", "")
+                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("accessToken", null)
                             .maxAge(0)
                             .path("/")
-                            .httpOnly(true)
-                            .secure(true)
-                            .sameSite("None")
                             .build()
                             .toString()
                     )
                     .body(new MessageDto(true, "이중 접속 로그아웃"));
         }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new MessageDto(false, "로그인 상태 유지"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDto(false, "로그인 상태 유지"));
     }
 }
