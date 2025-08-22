@@ -25,25 +25,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const IdleTimeoutHandler = () => {
-    const { logout } = useAuth();
-    const handleIdle = useCallback(() => {
-        safeAlert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
-        logout();
-    }, [logout]);
-    
-    useIdleTimeout(handleIdle, 1800);
-    return null;
-};
-
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [accessToken, setAccessTokenstate] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
 
-    const checkAuth = () => {
+    const isAuthenticated = !!accessToken && !!user; // 파생된 상태
+
+    const checkAuth = useCallback(() => {
         authFetcher('/api/auth/user/me', {
             method: 'GET',
             credentials: 'include'
@@ -55,45 +45,55 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (err.message.includes('401')) {
                 setUser(null);
                 setAccessTokenstate(null);
-                setIsLoggedIn(false);
                 Cookies.remove('accessToken');
                 Cookies.remove('refreshToken');
             }
         })
-    }
+    }, []);
 
     useEffect(() => {
         const token = Cookies.get('accessToken');
         if (token) {
             setAccessTokenstate(token);
-            setIsLoggedIn(true);
             checkAuth();
         }
         setIsLoading(false);
-    }, []);
+    }, [checkAuth]);
 
-    const setAccessToken = (accessToken: string) => {
+    const setAccessToken = useCallback((accessToken: string) => {
         setAccessTokenstate(accessToken);
         Cookies.set('accessToken', accessToken, { expires: 1/48 }); // 30분
-    }
+    }, []);
 
-    const isAuthenticated = () => {
-        return !!user;
-    }
-
-    const logout = () => {
+    const logout = useCallback(() => {
         setUser(null);
         setAccessTokenstate(null);
-        setIsLoggedIn(false);
         Cookies.remove('accessToken');
         Cookies.remove('refreshToken');
         router.push('/');
-    }
+    }, [router]);
+
+    const IdleTimeoutHandler = useCallback(() => {
+        const handleIdle = () => {
+            safeAlert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
+            logout();
+        };
+        useIdleTimeout(handleIdle, 1800);
+        return null;
+    }, [logout]);
 
     return (
-        <AuthContext.Provider value={{ user, accessToken, setAccessToken, isAuthenticated, isLoading, checkAuth, logout }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            accessToken, 
+            setAccessToken, 
+            isAuthenticated: () => isAuthenticated, 
+            isLoading, 
+            checkAuth, 
+            logout 
+        }}>
             {children}
-            {isLoggedIn && <IdleTimeoutHandler />}
+            {isAuthenticated && <IdleTimeoutHandler />}
         </AuthContext.Provider>
     );
 };

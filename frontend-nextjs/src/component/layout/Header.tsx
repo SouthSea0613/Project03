@@ -14,13 +14,7 @@ const Header = () => {
         try {
             await springFetcher('/api/auth/logout', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 credentials: 'include',
-                body: JSON.stringify({
-                    username: user?.username,
-                }),
             });
             safeAlert("로그아웃되었습니다");
             logout();
