@@ -28,7 +28,9 @@ const IdleTimeoutHandler = () => {
     const { logout } = useAuth();
 
     const handleIdle = useCallback(() => {
-        alert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
+        if (typeof window !== 'undefined') {
+            alert('30분 동안 활동이 없어 자동으로 로그아웃됩니다.');
+        }
         logout();
     }, [logout]);
 
@@ -69,8 +71,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = Cookies.get('accessToken');
         if(token) {
             setAccessTokenstate(token);
-            checkAuth();
             setIsLoggedIn(true);
+            // 토큰이 있을 때만 사용자 정보 조회
+            checkAuth();
         }
         setIsLoading(false);
     }, []);

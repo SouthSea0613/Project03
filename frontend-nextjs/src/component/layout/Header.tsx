@@ -21,7 +21,9 @@ const Header = () => {
                     username: user?.username,
                 }),
             });
-            alert("로그아웃되었습니다");
+            if (typeof window !== 'undefined') {
+                alert("로그아웃되었습니다");
+            }
             logout();
         } catch (err) {
             console.error('Logout error:', err);

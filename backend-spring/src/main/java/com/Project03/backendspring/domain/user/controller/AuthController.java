@@ -135,9 +135,14 @@ public class AuthController {
 
     @PostMapping("/checkAuth")
     public ResponseEntity<MessageDto> checkAuth(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
-        if (refreshToken == null || !authService.checkRefreshToken(refreshToken)) {
+        if (refreshToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageDto(false, "인증이 필요합니다"));
+                    .body(new MessageDto(false, "인증 토큰이 없습니다"));
+        }
+        
+        if (!authService.checkRefreshToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageDto(false, "유효하지 않은 토큰입니다"));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new MessageDto(true, "로그인 상태 유지"));

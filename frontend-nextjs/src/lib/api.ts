@@ -5,7 +5,8 @@ const FASTAPI_API_URL = process.env.NEXT_PUBLIC_FASTAPI_API_URL || "http://local
 
 async function handleResponse(response: Response) {
     if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`API call failed with status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();

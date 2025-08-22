@@ -33,16 +33,23 @@ export default function LoginPage() {
                     const accessToken = res.headers.get('Authorization')?.replace('Bearer ', '');
                     if (accessToken) {
                         setAccessToken(accessToken);
+                        if (typeof window !== 'undefined') {
+                            alert(res.data.message);
+                        }
+                        // 로그인 성공 후 사용자 정보 조회 및 페이지 이동
                         checkAuth();
-                        alert(res.data.message);
                         router.push("/");
                     }
                 }else{
-                    alert(res.data.message);
+                    if (typeof window !== 'undefined') {
+                        alert(res.data.message);
+                    }
                 }
             })
             .catch(err => {
-                alert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
+                if (typeof window !== 'undefined') {
+                    alert("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
+                }
             });
     }
 
