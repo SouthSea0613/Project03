@@ -53,6 +53,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(res.data.data);
         }).catch(err => {
             console.error('Auth check failed:', err);
+            
+            // 401 에러인 경우에만 상태 초기화
+            if (err.message.includes('401')) {
+                setUser(null);
+                setAccessTokenstate(null);
+                setIsLoggedIn(false);
+                Cookies.remove('accessToken');
+                Cookies.remove('refreshToken');
+            }
         })
     }
 
@@ -68,7 +77,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setAccessToken = (accessToken: string) => {
         setAccessTokenstate(accessToken);
-        Cookies.set('accessToken', accessToken, { expires: 0.5 }); // 30분
+        // 30분 = 1/48일
+        Cookies.set('accessToken', accessToken, { expires: 1/48 });
     }
 
     const isAuthenticated = () => {

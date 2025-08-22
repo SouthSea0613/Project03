@@ -134,17 +134,10 @@ public class AuthController {
     }
 
     @PostMapping("/checkAuth")
-    public ResponseEntity<MessageDto> checkAuth(@CookieValue("refreshToken") String refreshToken) {
-        if (!authService.checkRefreshToken(refreshToken)) {
+    public ResponseEntity<MessageDto> checkAuth(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken == null || !authService.checkRefreshToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.SET_COOKIE, ResponseCookie.from("refreshToken", null)
-                            .maxAge(0)
-                            .path("/")
-                            .httpOnly(true)
-                            .build()
-                            .toString()
-                    )
-                    .body(new MessageDto(false, "이중 접속 로그아웃"));
+                    .body(new MessageDto(false, "인증이 필요합니다"));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new MessageDto(true, "로그인 상태 유지"));
